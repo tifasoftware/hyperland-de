@@ -27,6 +27,9 @@ pv
 bc
 
 # Hyprland Ecosystem
+hyprland
+hyprland-qtutils
+hyprland-qt-support
 hyprpaper
 hyprpicker
 hypridle
