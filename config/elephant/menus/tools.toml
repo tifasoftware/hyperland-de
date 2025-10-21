@@ -17,3 +17,8 @@ actions = { "transcode" = "walker --theme menus -m menus:transcode --width 295 -
 icon = ""
 text = "Backups"
 actions = { "backups" = "walker --theme menus -m menus:backups --width 295 --minheight 1 --maxheight 600" }
+
+[[entries]]
+icon = ""
+text = "Add a webapp"
+actions = { "webapp-install" = "ghostty --class=local.floating -e webapp-install" }

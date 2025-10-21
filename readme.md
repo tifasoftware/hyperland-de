@@ -189,7 +189,7 @@ https://github.com/user-attachments/assets/044216d5-44a6-4b56-99d0-a820ceef3a68
 Just press SUPER + ALT + Space -> keybindings - all bindings nicely sorted here
 
 Most important ones:
-- SUPER + Q	= Open Terminal 
+- SUPER + Q	= Open Terminal
 - SUPER + W = Close window
 - SUPER + R = Open Walker
 - SUPER + E = File manager

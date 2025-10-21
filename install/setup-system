@@ -98,16 +98,9 @@ if [ -z "$CURRENT_GIT_EMAIL" ]; then
   fi
 fi
 
-# Setup chromium policies
-log_info "Configuring chromium policy..."
-sudo mkdir -p /etc/chromium/policies/managed
-sudo chown -R "$USER:$USER" /etc/chromium/policies
-sudo chmod -R 755 /etc/chromium/policies
-log_success "Chromium policies configured"
-
 # ly display manager configuration
-log_info "Configuring ly display manager..."
 if is_installed "ly"; then
+  log_info "Configuring ly display manager..."
   sudo mkdir -p /etc/systemd/system/ly.service.d
   [ -f "/etc/systemd/system/ly.service.d/override.conf" ] && backup_file "/etc/systemd/system/ly.service.d/override.conf"
   sudo cp "$DOTFILES_DIR/default/ly/override.conf" /etc/systemd/system/ly.service.d/override.conf
