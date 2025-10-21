@@ -13,6 +13,14 @@ if [[ "$BRANCH" == "dev" ]]; then
 
   if [[ "$local_commit" != "$remote_commit" ]]; then
     log_success "Dev update available ($local_commit -> $remote_commit)"
+
+    # Show what's changing
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" log --oneline --color=always "$local_commit..$remote_commit" | sed 's/^/  /'
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" diff --stat --color=always "$local_commit..$remote_commit" | sed 's/^/  /'
+    echo ""
+
     git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
     git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
     log_success "Dev updated to $remote_commit"
@@ -36,6 +44,14 @@ else
 
   if [[ "$current_tag" != "$latest_tag" ]]; then
     log_success "Master update available ($current_tag -> $latest_tag)"
+
+    # Show what's changing
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" log --oneline --color=always "$current_tag..$latest_tag" | sed 's/^/  /'
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" diff --stat --color=always "$current_tag..$latest_tag" | sed 's/^/  /'
+    echo ""
+
     git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
     git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
     log_success "Master updated to $latest_tag"
