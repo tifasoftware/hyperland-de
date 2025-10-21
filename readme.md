@@ -2,25 +2,37 @@
 
 [![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
 
-Dotfiles setup heavily based on [Omarchy](https://omarchy.org/), with static and dynamic themes and plenty of useful scripts.
+Dotfiles setup based on [Omarchy](https://omarchy.org/), with static and dynamic themes and plenty of useful scripts.
 
 [Credits - read here please](#credits)
 
 <table>
   <tr>
     <td><img src="demo/1.png" width="400"/></td>
-    <td><img src="demo/6.png" width="400"/></td>
+    <td><img src="demo/8.png" width="400"/></td>
   </tr>
   <tr>
     <td><img src="demo/4.png" width="400"/></td>
     <td><img src="demo/2.png" width="400"/></td>
   </tr>
   <tr>
-    <td><img src="demo/7.png" width="400"/></td>
+    <td><img src="demo/6.png" width="400"/></td>
     <td><img src="demo/3.png" width="400"/></td>
   </tr>
 </table>
 
+Quick info:
+- [bin](bin) - all scripts live here, it is added to path in uwsm config
+- [install](install/install) - main installation script
+- [pkgs.txt](install/pkgs.txt) - packages to be installed
+- [setup-applications](install/setup-applications) - hides some annoying applications from launcher
+- [setup-by-hardware](install/setup-by-hardware) - sets up monitors, keybindings, hypr enviroments
+- [setup-config](install/setup-config) - copies full config into ~/.config
+- [setup-lazyvim](install/setup-lazyvim) - lazyvim setup
+- [setup-nvidia](install/setup-nvidia) - nvidia specific setup
+- [setup-system](install/setup-system) - ufw, pacman.conf, triggers nvidia-setup if on nvidia gpu, git, ly login manager (if exists), enables gcr agent for ssh, disables systemd-networkd-wait-online.service that causes extremly long boot time
+- [setup-theme](install/setup-theme) - theming setup and symlinks
+- [setup-zsh](install/setup-zsh) - full zsh config with oh-my-zsh, plugins, nice features
 
 ## Table of Contents
 
@@ -67,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/Maciejonos/dotfiles/master/setup.sh
 - Backs up everything that will be changed ([backup script](install/lib/backup.sh))
   - Files in `~/.config`
   - `pacman.conf`
-  - Ly display manager configuration
+  - Ly display manager configuration (if installed)
   - ZSH and LazyVim configs
   - Everything else that gets modified
 - Creates a backup folder in your Home directory with:
@@ -117,7 +129,7 @@ A big collection of scripts, mainly used with Walker & Elephant. If installing m
 
 - [System setup](install/setup-system) configures:
   - Git configuration
-  - Ly display manager
+  - Ly display manager (if installed)
   - Pacman configuration
   - UFW firewall
 - Full [ZSH setup](default/zshrc) with modular configuration
@@ -147,8 +159,10 @@ Modern waybar config
 ![Lazyvim](demo/lazyvim.png)
 
 ### Menu overview
+https://github.com/user-attachments/assets/9b9cb437-a3e4-4cd7-90f1-80175036e196
 
 ### Dynamic Theming
+https://github.com/user-attachments/assets/044216d5-44a6-4b56-99d0-a820ceef3a68
 
 ### Application Launcher - Walker
 ![Walker](demo/walker.png)
@@ -172,6 +186,7 @@ Modern waybar config
 ---
 
 ## Keybinds
+Just press SUPER + ALT + Space -> keybindings - all bindings nicely sorted here
 
 Most important ones:
 - SUPER + Q	= Open Terminal 
@@ -181,9 +196,6 @@ Most important ones:
 - SUPER + V = Clipboard
 - SUPER + ALT + Space = Menu
 - SUPER + CTRL + W = Open Waypaper (to trigger dynamic color update - theme must be set to Matugen or Pywal)
-
-
-Full configuration can be found in [default/hypr/conf/](default/hypr/conf/)
 
 Walker bindings - `ctrl + x` to go back from submenu
 
@@ -206,7 +218,7 @@ The setup includes both static and dynamic theming:
 
 ## Credits
 
-By no means am I claiming I created all of this myself - I've taken the whole theming system & a lot of scripts from [Omarchy](https://omarchy.org) - of course a lot are my own or heavily changed. I wanted something more of my own, that I can customize more easily without installing a full distro. Omarchy is an awesome project, and if you haven't heard of it, you should definitely check it out!
+By no means am I claiming I created all of this myself - I've taken the whole static theming system & some scripts from [Omarchy](https://omarchy.org) - of course a lot are my own or heavily changed. I wanted something more of my own, that I can customize more easily without installing a full distro. Omarchy is an awesome project, and if you haven't heard of it, you should definitely check it out!
 
 Other projects that I really like:
 - https://github.com/mylinuxforwork
