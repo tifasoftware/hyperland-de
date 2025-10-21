@@ -1,0 +1,51 @@
+#!/bin/bash
+
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+set -e
+
+log_header "Docker Setup"
+
+if [ "$EUID" -eq 0 ]; then
+  log_error "Don't run this script as root/sudo"
+  exit 1
+fi
+
+log_step "Installing Docker and Docker Compose..."
+sudo pacman -S --needed docker docker-compose
+
+# Add user to docker group
+log_step "Adding $USER to docker group..."
+if groups $USER | grep -q '\bdocker\b'; then
+  log_info "User '$USER' already in docker group"
+else
+  sudo usermod -aG docker "$USER"
+  log_success "User '$USER' added to docker group"
+  log_detail "You'll need to log out and back in for group changes to take effect"
+fi
+
+log_step "Enabling and starting Docker service..."
+sudo systemctl enable docker
+sudo systemctl start docker
+
+log_step "Testing Docker..."
+if sudo docker info &>/dev/null; then
+  log_success "Docker is running and accessible"
+else
+  log_error "Could not connect to Docker"
+fi
+
+log_step "Installing lazydocker..."
+if ! command -v paru &>/dev/null; then
+  log_info "paru not installed, skipping lazydocker"
+  log_detail "Install manually: paru -S lazydocker"
+else
+  if paru -S --noconfirm lazydocker 2>/dev/null; then
+    log_success "lazydocker installed"
+  else
+    log_error "Could not install lazydocker"
+    log_detail "Install manually: paru -S lazydocker"
+  fi
+fi
+
+show_done

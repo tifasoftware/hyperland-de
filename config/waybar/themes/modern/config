@@ -1,0 +1,76 @@
+{
+    "layer": "top",
+    "position": "top",
+    "include": [
+        "~/.config/waybar/modules.json"
+    ],
+
+    "hyprland/workspaces": {
+         "disable-scroll": true,
+         "sort-by-name": true,
+         "format": " {icon} ",
+         "format-icons": {
+            "default": "",
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "active": "",
+         },
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": []
+        }
+     },
+
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+    },
+
+    "clock": {
+        "format-alt": "{:%d/%m/%Y}",
+        "format": " {:%H:%M}"
+    },
+
+    "pulseaudio": {
+        "scroll-step": 1,
+        "format": "{icon} {volume}%",
+        "on-click": "ghostty --class=local.wiremix -e wiremix",
+        "on-click-right": "pamixer -t",
+        "tooltip-format": "Playing at {volume}%",
+        "format-muted": "",
+        "format-icons": {
+        "default": ["", "", " "]
+        }
+    },
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/updates"
+    ],
+
+    "modules-center": [
+        "custom/music"
+    ],
+
+    "modules-right": [
+        "pulseaudio",
+        "clock",
+        "tray",
+        "bluetooth",
+        "network",
+        "cpu",
+        "custom/brightness",
+        "custom/hypridle",
+        "custom/exit"
+    ]
+}

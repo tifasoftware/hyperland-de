@@ -1,0 +1,19 @@
+name = "themes"
+name_pretty = "Themes"
+fixed_order = true
+icon = "󰸌"
+
+[[entries]]
+icon = "󰸌"
+text = "System theme"
+actions = { "change-theme" = "theme-select" }
+
+[[entries]]
+icon = "󰸌"
+text = "Waybar theme"
+actions = { "change-waybar" = "theme-waybar" }
+
+[[entries]]
+icon = "󰸌"
+text = "Fastfetch theme"
+actions = { "change-fastfetch" = "theme-fastfetch" }

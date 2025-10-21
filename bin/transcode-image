@@ -1,0 +1,185 @@
+#!/bin/bash
+
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+set -e
+
+get_input_file() {
+    log_step "Select input file" >&2
+
+    local method=$(gum choose "Browse with fzf" "Paste file path" --header "How would you like to select the input file?") || exit 1
+
+    local input_file
+    if [[ "$method" == "Browse with fzf" ]]; then
+        input_file=$(find "$HOME" -type f \( \
+            -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o \
+            -iname "*.gif" -o -iname "*.webp" -o -iname "*.bmp" -o \
+            -iname "*.tiff" -o -iname "*.tif" -o -iname "*.avif" \) \
+            ! -path "*/.*" \
+            ! -path "*/.cache/*" \
+            ! -path "*/.local/share/Trash/*" 2>/dev/null |
+            sed "s|^$HOME|~|" | sort |
+            fzf --prompt="Select image file: " --height=80% --color='pointer:green,marker:green' |
+            sed "s|^~|$HOME|")
+    else
+        input_file=$(gum input --placeholder "Enter full path to image file")
+    fi
+
+    if [[ -z "$input_file" ]]; then
+        log_error "No file selected or provided" >&2
+        exit 1
+    fi
+
+    if [[ ! -f "$input_file" ]]; then
+        log_error "File not found: $input_file" >&2
+        exit 1
+    fi
+
+    log_success "Selected: $input_file" >&2
+    echo "$input_file"
+}
+
+detect_format() {
+    local input="$1"
+    identify -format "%m" "$input" 2>/dev/null | tr '[:upper:]' '[:lower:]'
+}
+
+do_compress() {
+    local input_file="$1"
+    local input_format=$(detect_format "$input_file")
+    log_info "Input format: ${input_format^^}" >&2
+
+    log_step "Select compression method" >&2
+    local method=$(gum choose \
+        "High quality (95%) - Best for wallpapers" \
+        "Medium quality (85%) - Balanced" \
+        "Small size (1080px width, 95%) - For sharing" \
+        --header "Choose compression level") || exit 1
+    log_success "Method: $method" >&2
+
+    local output_file="${input_file%.*}_compressed.jpg"
+
+    echo
+    gum style --foreground 108 "Input:  $input_file"
+    gum style --foreground 108 "Output: $output_file"
+    gum style --foreground 108 "Method: $method"
+    echo
+
+    if ! ask_yes_no "Proceed with compression?"; then
+        log_error "Cancelled"
+        exit 0
+    fi
+
+    log_step "Compressing image..."
+    echo
+
+    case "$method" in
+        "High quality"*)
+            magick "$input_file" -quality 95 -strip "$output_file"
+            ;;
+        "Medium quality"*)
+            magick "$input_file" -quality 85 -strip "$output_file"
+            ;;
+        "Small size"*)
+            magick "$input_file" -resize 1080x\> -quality 95 -strip "$output_file"
+            ;;
+    esac
+
+    local exit_code=$?
+    echo
+
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Compression complete!"
+        log_detail "$output_file"
+    else
+        log_error "Compression failed"
+        exit 1
+    fi
+}
+
+do_transcode() {
+    local input_file="$1"
+    local input_format=$(detect_format "$input_file")
+    log_info "Input format: ${input_format^^}" >&2
+
+    log_step "Select output format" >&2
+    local format=$(gum choose "jpg" "png" "webp" "avif" --header "Select output format") || exit 1
+    log_success "Format: $format" >&2
+
+    local output_file="${input_file%.*}.${format}"
+
+    if [[ -f "$output_file" ]]; then
+        log_error "Output file already exists: $output_file" >&2
+        exit 1
+    fi
+
+    echo
+    gum style --foreground 108 "Input:  $input_file"
+    gum style --foreground 108 "Output: $output_file"
+    gum style --foreground 108 "Format: ${format^^}"
+    echo
+
+    if ! ask_yes_no "Proceed with transcode?"; then
+        log_error "Cancelled"
+        exit 0
+    fi
+
+    log_step "Transcoding image..."
+    echo
+
+    case "$format" in
+        jpg)
+            magick "$input_file" -quality 95 -strip "$output_file"
+            ;;
+        png)
+            magick "$input_file" -strip \
+                -define png:compression-filter=5 \
+                -define png:compression-level=9 \
+                -define png:compression-strategy=1 \
+                -define png:exclude-chunk=all \
+                "$output_file"
+            ;;
+        webp)
+            magick "$input_file" -quality 95 -strip "$output_file"
+            ;;
+        avif)
+            magick "$input_file" -quality 90 -strip "$output_file"
+            ;;
+    esac
+
+    local exit_code=$?
+    echo
+
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Transcode complete!"
+        log_detail "$output_file"
+    else
+        log_error "Transcode failed"
+        exit 1
+    fi
+}
+
+main() {
+    log_header "Image transcode"
+
+    log_step "Select operation"
+    local operation=$(gum choose \
+        "Compress" \
+        "Transcode" \
+        --header "What would you like to do?") || exit 1
+
+    log_success "Operation: $operation"
+    echo
+
+    local input_file=$(get_input_file)
+    echo
+
+    case "$operation" in
+        "Compress") do_compress "$input_file" ;;
+        "Transcode") do_transcode "$input_file" ;;
+    esac
+
+    show_done
+}
+
+main "$@"

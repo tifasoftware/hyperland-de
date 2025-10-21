@@ -1,0 +1,36 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+if [[ -z $1 && $1 != "CNCLD" ]]; then
+  log_error "Usage: theme-set <theme-name>"
+  exit 1
+fi
+
+THEMES_DIR="$HOME/.local/share/dotfiles/themes"
+CURRENT_THEME_DIR="$HOME/.local/share/dotfiles/current/theme"
+
+THEME_NAME=$(echo "$1" | sed -E 's/<[^>]+>//g' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+# Check if the theme entered exists
+if [[ ! -d "$THEME_PATH" ]]; then
+  log_error "Theme '$THEME_NAME' does not exist in $THEMES_DIR"
+  exit 1
+fi
+
+# Update theme symlinks
+ln -nsf "$THEME_PATH" "$CURRENT_THEME_DIR"
+
+# Change background with theme
+theme-bg-next
+
+# Restart components to apply new theme
+restart-app waybar
+restart-app swayosd-server
+hyprctl reload
+pkill -SIGUSR2 btop
+makoctl reload
+killall -SIGUSR2 ghostty
+theme-set-vscode
+theme-set-gnome
+theme-set-chromium

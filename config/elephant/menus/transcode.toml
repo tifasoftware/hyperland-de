@@ -1,0 +1,14 @@
+name = "transcode"
+name_pretty = "Transcode"
+fixed_order = true
+icon = ""
+
+[[entries]]
+icon = ""
+text = "Transcode video"
+actions = { "transcode-video" = "ghostty --class=local.floating -e transcode-video" }
+
+[[entries]]
+icon = ""
+text = "Transcode image"
+actions = { "transcode-image" = "ghostty --class=local.floating -e transcode-image" }

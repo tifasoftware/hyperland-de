@@ -1,0 +1,59 @@
+{
+    // General Settings
+    "reload_style_on_change": true,
+    "layer": "top",
+    "position": "top",
+    "include": [
+        "~/.config/waybar/modules.json"
+    ],
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "active": "",
+            "default": "",
+            "empty": ""
+        },
+        "persistent-workspaces": {
+            "*": [ 1,2,3,4,5 ]
+        }
+    },
+    "custom/expand": {
+        "format": "",
+        "tooltip": false
+    },
+
+    "group/expand": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 200,
+            "transition-to-left": true,
+            "click-to-reveal": true
+        },
+        "modules": ["custom/expand", "custom/filemanager"],
+    },
+
+    // Modules Left
+    "modules-left": [
+        "clock",
+        "group/expand",
+    ],
+
+    // Modules Center
+    "modules-center": [
+        "hyprland/workspaces"
+    ],
+
+    // Modules Right
+    "modules-right": [
+        "custom/updates",
+        "pulseaudio",
+        "bluetooth",
+        "network",
+        "cpu",
+        "custom/brightness",
+        "custom/hypridle",
+        "custom/exit",
+        "battery"
+    ]
+}

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+FASTFETCH_DIR="$HOME/.config/fastfetch"
+CONFIGS_DIR="$FASTFETCH_DIR/configs"
+CONFIG_LINK="$FASTFETCH_DIR/config.jsonc"
+
+if [[ ! -d "$CONFIGS_DIR" ]]; then
+  notify-send "Error" "Fastfetch configs directory not found: $CONFIGS_DIR"
+  exit 1
+fi
+
+configs=$(find "$CONFIGS_DIR" -mindepth 1 -maxdepth 1 -type f -name "*.jsonc" | sort | while read -r path; do
+  config_name="$(basename "$path" .jsonc)"
+  display_name=$(echo "$config_name" | sed 's/^config-//; s/-/ /g; s/\b\(.\)/\u\1/g')
+  echo "$display_name"
+done)
+
+if [[ -z "$configs" ]]; then
+  notify-send "Error" "No fastfetch configs found"
+  exit 1
+fi
+
+selected=$(echo "$configs" | walker --dmenu --theme menus --width 295 --minheight 1 --maxheight 600 -p "Select" 2>/dev/null)
+
+if [[ "$selected" == "CNCLD" || -z "$selected" ]]; then
+  exit 0
+fi
+
+selected=$(echo "$selected" | tr -d '\n' | xargs)
+
+config_name=$(echo "$selected" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+config_file="$CONFIGS_DIR/config-$config_name.jsonc"
+
+if [[ ! -f "$config_file" ]]; then
+  config_file="$CONFIGS_DIR/$config_name.jsonc"
+fi
+
+if [[ ! -f "$config_file" ]]; then
+  notify-send "Error" "Fastfetch config '$config_name' does not exist"
+  exit 1
+fi
+
+if [[ -e "$CONFIG_LINK" || -L "$CONFIG_LINK" ]]; then
+  rm -f "$CONFIG_LINK"
+fi
+
+ln -s "$config_file" "$CONFIG_LINK"
+
+notify-send "Fastfetch Config" "Switched to $selected"

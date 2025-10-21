@@ -1,0 +1,178 @@
+force_keyboard_focus = false    # forces keyboard forcus to stay in Walker
+close_when_open = true          # close walker when invoking while already opened
+click_to_close = true           # closes walker if clicking outside of the main content area
+selection_wrap = false          # wrap list if at bottom or top
+global_argument_delimiter = "#" # query: firefox#https://benz.dev => part after delimiter will be ignored when querying. this should be the same as in the elephant config
+exact_search_prefix = "'"       # disable fuzzy searching
+theme = "dotfiles"               # theme to use
+disable_mouse = false           # disable mouse (on input and list only)
+additional_theme_location = "~/.local/share/dotfiles/default/walker/themes/"
+
+[shell]
+anchor_top = true
+anchor_bottom = true
+anchor_left = true
+anchor_right = true
+
+[placeholders]
+"default" = { input = "Search", list = "No Results" }
+"menus:system" = { input = "System", list = "No Results" }
+"menus:menu" = { input = "Search", list = "No Results" }
+"menus:backups" = { input = "Backups", list = "No Results" }
+"menus:capture" = { input = "Capture", list = "No Results" }
+"menus:tools" = { input = "Tools", list = "No Results" }
+"menus:postgres" = { input = "Postgres", list = "No Results" }
+"menus:screenshots" = { input = "Screenshots", list = "No Results" }
+"menus:setup" = { input = "Setup", list = "No Results" }
+"menus:themes" = { input = "Themes", list = "No Results" }
+"menus:transcode" = { input = "Transcode media", list = "No Results" }
+
+[keybinds]
+close = ["Escape"]
+next = ["Down"]
+previous = ["Up"]
+toggle_exact = ["ctrl e"]
+resume_last_query = ["ctrl r"]
+quick_activate = []
+
+[providers]
+default = [
+  "desktopapplications"
+] # providers to be queried by default
+empty = ["desktopapplications"]
+
+[[providers.prefixes]]
+prefix = ";"
+provider = "providerlist"
+
+[[providers.prefixes]]
+prefix = "/"
+provider = "files"
+
+[[providers.prefixes]]
+prefix = "!"
+provider = "todo"
+
+[[providers.prefixes]]
+prefix = "="
+provider = "calc"
+
+[providers.actions]
+dmenu = [
+ { action = "select", default = true, bind = "Return" },
+ { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+providerlist = [
+  { action = "activate", default = true, bind = "Return", after = "ClearReload" },
+]
+
+calc = [
+  { action = "copy", default = true, bind = "Return" },
+  { action = "delete", bind = "ctrl d", after = "AsyncReload" },
+  { action = "save", bind = "ctrl s", after = "AsyncClearReload" },
+]
+
+desktopapplications = [
+  { action = "start", default = true, bind = "Return" },
+  { action = "start:keep", label = "open+next", bind = "shift Return", after = "KeepOpen" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "AsyncReload" },
+  { action = "pin", bind = "ctrl p", after = "AsyncReload" },
+  { action = "unpin", bind = "ctrl p", after = "AsyncReload" },
+  { action = "pinup", bind = "ctrl n", after = "AsyncReload" },
+  { action = "pindown", bind = "ctrl m", after = "AsyncReload" },
+]
+
+todo = [
+  { action = "save", default = true, bind = "Return", after = "ClearReload" },
+  { action = "delete", bind = "ctrl d", after = "ClearReload" },
+  { action = "active", bind = "Return", after = "ClearReload" },
+  { action = "inactive", bind = "Return", after = "ClearReload" },
+  { action = "done", bind = "ctrl f", after = "ClearReload" },
+  { action = "clear", bind = "ctrl x", after = "ClearReload", global = true },
+]
+
+clipboard = [
+  { action = "copy", default = true, bind = "Return" },
+  { action = "remove", bind = "ctrl d", after = "ClearReload" },
+  { action = "remove_all", global = true, label = "clear", bind = "ctrl shift d", after = "ClearReload" },
+  { action = "toggle_images", global = true, label = "toggle images", bind = "ctrl i", after = "ClearReload" },
+  { action = "edit", bind = "ctrl o" },
+]
+
+"menus:screenshots" = [
+  { action = "area_clipboard", bind = "Return" },
+  { action = "area_file", bind = "Return" },
+  { action = "window_clipboard", bind = "Return" },
+  { action = "window_file", bind = "Return" },
+  { action = "fullscreen_clipboard", bind = "Return" },
+  { action = "fullscreen_file", bind = "Return" },
+  { action = "provider:menus:capture", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:system" = [
+  { action = "lock", bind = "Return" },
+  { action = "suspend", bind = "Return" },
+  { action = "relaunch", bind = "Return" },
+  { action = "restart", bind = "Return" },
+  { action = "shutdown", bind = "Return" },
+  { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:setup" = [
+  { action = "postgres", bind = "Return" },
+  { action = "docker", bind = "Return" },
+  { action = "nodejs", bind = "Return" },
+  { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:postgres" = [
+  { action = "postgres-setup", bind = "Return" },
+  { action = "postgres-restore-db", bind = "Return" },
+  { action = "postgres-backup", bind = "Return" },
+  { action = "provider:menus:setup", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:capture" = [
+  { action = "screenshot", bind = "Return" },
+  { action = "record", bind = "Return" },
+  { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:backups" = [
+  { action = "backup-files", bind = "Return" },
+  { action = "backup-restore", bind = "Return" },
+  { action = "provider:menus:tools", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:themes" = [
+  { action = "change-theme", bind = "Return" },
+  { action = "change-waybar", bind = "Return" },
+  { action = "change-fastfetch", bind = "Return" },
+  { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:tools" = [
+  { action = "download-video", bind = "Return" },
+  { action = "transcode", bind = "Return" },
+  { action = "backups", bind = "Return" },
+  { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:transcode" = [
+  { action = "transcode-video", bind = "Return" },
+  { action = "transcode-image", bind = "Return" },
+  { action = "provider:menus:tools", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:menu" = [
+  { action = "update", bind = "Return" },
+  { action = "pkg-install", bind = "Return" },
+  { action = "pkg-install-aur", bind = "Return" },
+  { action = "pkg-remove", bind = "Return" },
+  { action = "change-themes", bind = "Return" },
+  { action = "capture", bind = "Return" },
+  { action = "setup", bind = "Return" },
+  { action = "keybindings", bind = "Return" },
+  { action = "system", bind = "Return" },
+]

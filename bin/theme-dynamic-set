@@ -1,0 +1,251 @@
+#!/bin/bash
+
+WALLPAPER="$1"
+CACHE_DIR="$HOME/.cache/wal"
+COLORS_JSON="$CACHE_DIR/colors.json"
+CONFIG_BASE="$HOME/.local/share/dotfiles"
+TEMPLATES_DIR="$CONFIG_BASE/config/wal/templates"
+OUTPUT_DIR="$CONFIG_BASE/themes/pywal"
+
+# ============================================================================
+# Color Conversion Functions
+# ============================================================================
+
+strip_hash() {
+    echo "${1#\#}"
+}
+
+hex_to_rgb() {
+    local hex=$(strip_hash "$1")
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+    echo "$r $g $b"
+}
+
+hex_to_hsl() {
+    local hex=$(strip_hash "$1")
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+
+    local max=$r
+    local max_component="r"
+    if (( g > max )); then
+        max=$g
+        max_component="g"
+    fi
+    if (( b > max )); then
+        max=$b
+        max_component="b"
+    fi
+
+    local min=$r
+    (( g < min )) && min=$g
+    (( b < min )) && min=$b
+
+    local delta=$((max - min))
+
+    # Calculate hue
+    local hue=0
+    if (( delta > 0 )); then
+        local r_norm=$(echo "scale=6; $r / 255" | bc -l)
+        local g_norm=$(echo "scale=6; $g / 255" | bc -l)
+        local b_norm=$(echo "scale=6; $b / 255" | bc -l)
+        local delta_norm=$(echo "scale=6; $delta / 255" | bc -l)
+
+        if [[ "$max_component" == "r" ]]; then
+            local hue_calc=$(echo "scale=6; ($g_norm - $b_norm) / $delta_norm" | bc -l)
+            if (( $(echo "$hue_calc < 0" | bc -l) )); then
+                hue_calc=$(echo "scale=6; $hue_calc + 6" | bc -l)
+            fi
+            hue=$(echo "scale=6; ($hue_calc / 6) * 360" | bc | cut -d. -f1)
+        elif [[ "$max_component" == "g" ]]; then
+            local hue_calc=$(echo "scale=6; (($b_norm - $r_norm) / $delta_norm) + 2" | bc -l)
+            hue=$(echo "scale=6; ($hue_calc / 6) * 360" | bc | cut -d. -f1)
+        else
+            local hue_calc=$(echo "scale=6; (($r_norm - $g_norm) / $delta_norm) + 4" | bc -l)
+            hue=$(echo "scale=6; ($hue_calc / 6) * 360" | bc | cut -d. -f1)
+        fi
+    fi
+
+    echo "$hue"
+}
+
+hue_to_yaru_theme() {
+    local hue=$1
+
+    # Red: 345-15°
+    if (( hue >= 345 || hue < 15 )); then
+        echo "Yaru-red"
+    # Warty Brown: 15-30°
+    elif (( hue >= 15 && hue < 30 )); then
+        echo "Yaru-wartybrown"
+    # Yellow: 30-60°
+    elif (( hue >= 30 && hue < 60 )); then
+        echo "Yaru-yellow"
+    # Olive: 60-90°
+    elif (( hue >= 60 && hue < 90 )); then
+        echo "Yaru-olive"
+    # Sage: 90-165°
+    elif (( hue >= 90 && hue < 165 )); then
+        echo "Yaru-sage"
+    # Prussian Green: 165-195°
+    elif (( hue >= 165 && hue < 195 )); then
+        echo "Yaru-prussiangreen"
+    # Blue: 195-255°
+    elif (( hue >= 195 && hue < 255 )); then
+        echo "Yaru-blue"
+    # Purple: 255-285°
+    elif (( hue >= 255 && hue < 285 )); then
+        echo "Yaru-purple"
+    # Magenta: 285-345°
+    else
+        echo "Yaru-magenta"
+    fi
+}
+
+# ============================================================================
+# Template Processing
+# ============================================================================
+
+process_template() {
+    local template_file="$1"
+    local output_file="$2"
+
+    if [[ ! -f "$template_file" ]]; then
+        echo "Warning: Template not found: $template_file"
+        return
+    fi
+
+    local content=$(cat "$template_file")
+
+    local background=$(jq -r '.special.background' "$COLORS_JSON")
+    local foreground=$(jq -r '.special.foreground' "$COLORS_JSON")
+    local cursor=$(jq -r '.special.cursor' "$COLORS_JSON")
+
+    content="${content//\{background.strip\}/$(strip_hash "$background")}"
+    content="${content//\{background.rgb\}/$(hex_to_rgb "$background")}"
+    content="${content//\{background\}/$background}"
+
+    content="${content//\{foreground.strip\}/$(strip_hash "$foreground")}"
+    content="${content//\{foreground.rgb\}/$(hex_to_rgb "$foreground")}"
+    content="${content//\{foreground\}/$foreground}"
+
+    content="${content//\{cursor.strip\}/$(strip_hash "$cursor")}"
+    content="${content//\{cursor.rgb\}/$(hex_to_rgb "$cursor")}"
+    content="${content//\{cursor\}/$cursor}"
+
+    for i in {0..15}; do
+        local color=$(jq -r ".colors.color$i" "$COLORS_JSON")
+        content="${content//\{color${i}.strip\}/$(strip_hash "$color")}"
+        content="${content//\{color${i}.rgb\}/$(hex_to_rgb "$color")}"
+        content="${content//\{color${i}\}/$color}"
+    done
+
+    mkdir -p "$(dirname "$output_file")"
+    echo "$content" > "$output_file"
+    echo "✓ Generated: $output_file"
+}
+
+# ============================================================================
+# Main Flow
+# ============================================================================
+
+main() {
+    if [[ -z "$WALLPAPER" ]]; then
+        echo "Usage: theme-dynamic-set <wallpaper_path>"
+        exit 1
+    fi
+
+    if [[ ! -f "$WALLPAPER" ]]; then
+        echo "Error: Wallpaper file not found: $WALLPAPER"
+        exit 1
+    fi
+
+    echo "Running pywal..."
+    wal -n -s -t -e -i "$WALLPAPER"
+
+    if [[ ! -f "$COLORS_JSON" ]]; then
+        echo "Error: Failed to generate pywal colors"
+        exit 1
+    fi
+
+    echo "✓ Pywal colors extracted"
+    echo
+
+    echo "Processing templates..."
+    mkdir -p "$OUTPUT_DIR"
+
+    process_template "$TEMPLATES_DIR/waybar.css" "$OUTPUT_DIR/waybar.css"
+    process_template "$TEMPLATES_DIR/hyprland.conf" "$OUTPUT_DIR/hyprland.conf"
+    process_template "$TEMPLATES_DIR/mako.ini" "$OUTPUT_DIR/mako.ini"
+    process_template "$TEMPLATES_DIR/ghostty.conf" "$OUTPUT_DIR/ghostty.conf"
+    process_template "$TEMPLATES_DIR/btop.theme" "$OUTPUT_DIR/btop.theme"
+    process_template "$TEMPLATES_DIR/swayosd.css" "$OUTPUT_DIR/swayosd.css"
+    process_template "$TEMPLATES_DIR/walker.css" "$OUTPUT_DIR/walker.css"
+    process_template "$TEMPLATES_DIR/hyprlock.conf" "$OUTPUT_DIR/hyprlock.conf"
+    process_template "$TEMPLATES_DIR/chromium.theme" "$OUTPUT_DIR/chromium.theme"
+    process_template "$TEMPLATES_DIR/gtk.css" "$OUTPUT_DIR/gtk.css"
+
+    echo
+
+    echo "Copying static files..."
+    if [[ -f "$TEMPLATES_DIR/neovim.lua" ]]; then
+        cp "$TEMPLATES_DIR/neovim.lua" "$OUTPUT_DIR/neovim.lua"
+        echo "✓ Copied neovim.lua"
+    fi
+    echo
+
+    echo "Generating icon theme..."
+    local accent_color=$(jq -r '.colors.color1' "$COLORS_JSON")
+    local hue=$(hex_to_hsl "$accent_color")
+    local yaru_theme=$(hue_to_yaru_theme "$hue")
+    echo "$yaru_theme" > "$OUTPUT_DIR/icons.theme"
+    echo "✓ Generated icons.theme: $yaru_theme (hue: ${hue}°)"
+    echo
+
+    echo "Running matugen..."
+    if command -v matugen &> /dev/null; then
+        matugen image "$WALLPAPER" -m "dark"
+        echo "✓ Matugen colors generated"
+
+        echo "Generating icon theme from matugen..."
+        local matugen_json=$(matugen image "$WALLPAPER" -m "dark" --dry-run -j hex 2>&1)
+        local accent_color=$(echo "$matugen_json" | jq -r '.colors.dark.primary')
+        local hue=$(hex_to_hsl "$accent_color")
+        local yaru_theme=$(hue_to_yaru_theme "$hue")
+
+        local matugen_output_dir="$CONFIG_BASE/themes/matugen"
+        mkdir -p "$matugen_output_dir"
+        echo "$yaru_theme" > "$matugen_output_dir/icons.theme"
+        echo "✓ Generated matugen icons.theme: $yaru_theme (hue: ${hue}°)"
+    else
+        echo "Warning: matugen not found, skipping"
+    fi
+    echo
+
+    echo "Updating background symlink..."
+    ln -nsf "$WALLPAPER" "$CONFIG_BASE/current/background"
+    echo "✓ Updated background symlink"
+    echo
+
+    echo "Reloading applications..."
+    sleep 0.5
+
+    restart-app waybar
+    restart-app swayosd-server
+    hyprctl reload
+    pkill -SIGUSR2 btop
+    makoctl reload
+    killall -SIGUSR2 ghostty
+    theme-set-vscode
+    theme-set-gnome
+    theme-set-chromium
+
+    echo "✓ Applications reloaded"
+    echo
+    echo "Done! Theme applied successfully."
+}
+
+main "$@"

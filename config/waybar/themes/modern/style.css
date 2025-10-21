@@ -1,0 +1,108 @@
+@import "../../.local/share/dotfiles/current/theme/waybar.css";
+
+* {
+    font-family: CaskaydiaMono Nerd Font;
+    font-size: 16px;
+    min-height: 0;
+}
+
+#waybar {
+    background: transparent;
+    color: @background;
+    margin: 5px 5px;
+}
+
+#workspaces {
+    border-radius: 1rem;
+    margin: 5px;
+    background-color: @background;
+    margin-left: 1rem;
+}
+
+#workspaces button {
+    color: @foreground;
+    border-radius: 1rem;
+    padding: 0.4rem;
+}
+
+#workspaces button.active {
+    color: @foreground;
+    border-radius: 1rem;
+}
+
+#custom-music,
+#tray,
+#bluetooth,
+#cpu,
+#clock,
+#network,
+#battery,
+#pulseaudio,
+#custom-brightness,
+#custom-hypridle,
+#custom-updates,
+#custom-exit {
+    background-color: @background;
+    padding: 0.5rem 1rem;
+    margin: 5px 0;
+}
+
+#clock {
+    color: @foreground;
+    border-radius: 0px 1rem 1rem 0px;
+    margin-right: 1rem;
+}
+
+#pulseaudio {
+    color: @foreground;
+    border-radius: 1rem 0px 0px 1rem;
+    margin-left: 1rem;
+}
+
+#custom-music {
+    color: @foreground;
+    border-radius: 1rem;
+}
+
+#bluetooth {
+    border-radius: 1rem 0rem 0rem 1rem;
+    margin-left: 1rem;
+    color: @foreground;
+}
+
+#cpu,
+#network,
+#custom-hypridle,
+#custom-brightness {
+    color: @foreground;
+}
+
+#custom-exit {
+    border-radius: 0rem 1rem 1rem 0rem;
+    margin-right: 1rem;
+    color: @foreground;
+}
+
+#tray {
+    border-radius: 1rem;
+}
+
+#custom-updates {
+    border-radius: 1rem;
+    color: @foreground;
+}
+
+#custom-hypridle.notactive {
+    color: rgb(224, 137, 137);
+}
+
+tooltip {
+    background-color: alpha(@background, 0.9);
+    padding: 20px;
+    margin: 0px;
+    border-radius: 1rem;
+}
+
+tooltip label {
+    color: @foreground;
+}

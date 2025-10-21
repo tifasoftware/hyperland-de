@@ -1,0 +1,188 @@
+#!/bin/bash
+
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+set -e
+
+get_input_file() {
+    log_step "Select input file" >&2
+
+    local method
+    method=$(gum choose "Browse with fzf" "Paste file path" --header "How would you like to select the input file?") || exit 1
+
+    local input_file
+    if [[ "$method" == "Browse with fzf" ]]; then
+        input_file=$(find "$HOME" -type f \( \
+            -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.avi" -o \
+            -iname "*.mov" -o -iname "*.webm" -o -iname "*.m4v" -o \
+            -iname "*.flv" -o -iname "*.wmv" -o -iname "*.mpg" -o \
+            -iname "*.mpeg" -o -iname "*.m2ts" \) \
+            ! -path "*/.*" \
+            ! -path "*/.cache/*" \
+            ! -path "*/.local/share/Trash/*" 2>/dev/null |
+            sed "s|^$HOME|~|" | sort |
+            fzf --prompt="Select video file: " --height=80% --color='pointer:green,marker:green' |
+            sed "s|^~|$HOME|")
+    else
+        input_file=$(gum input --placeholder "Enter full path to video file")
+    fi
+
+    if [[ -z "$input_file" ]]; then
+        log_error "No file selected or provided" >&2
+        exit 1
+    fi
+
+    if [[ ! -f "$input_file" ]]; then
+        log_error "File not found: $input_file" >&2
+        exit 1
+    fi
+
+    log_success "Selected: $input_file" >&2
+    echo "$input_file"
+}
+
+get_presets() {
+    local preset_type="$1"
+    if [[ "$preset_type" == "general" ]]; then
+        HandBrakeCLI -z 2>&1 | awk '/^General\//,/^Web\// {if (/^    [^ ]/) print}' | sed 's/^    //'
+    else
+        HandBrakeCLI -z 2>&1 | awk '/^[A-Z][a-z]+\// { category = $0; next } /^    [^ ]/ && category { print category " → " $0 }' | sed -e 's/^    //' -e 's/ →     / → /'
+    fi
+}
+
+select_preset() {
+    log_step "Select preset" >&2
+
+    local preset
+    preset=$({
+        get_presets "general"
+        echo "──────────────────────────"
+        echo "» Show All Categories «"
+    } | fzf --prompt="Select preset (General/): " --height=80% --color='pointer:green,marker:green') || {
+        log_error "No preset selected" >&2
+        exit 1
+    }
+
+    if echo "$preset" | grep -q "Show All Categories"; then
+        preset=$(get_presets "all" |
+            fzf --prompt="Select preset: " --height=80% --color='pointer:green,marker:green' |
+            sed 's/.*→[[:space:]]*//')
+
+        [[ -z "$preset" ]] && { log_error "No preset selected" >&2; exit 1; }
+    fi
+
+    echo "$preset"
+}
+
+generate_output_name() {
+    local input="$1"
+    local suffix="$2"
+    local dir=$(dirname "$input")
+    local base=$(basename "$input")
+    echo "${dir}/${base%.*}_${suffix}.${base##*.}"
+}
+
+do_compress() {
+    local input_file="$1"
+    local preset=$(select_preset)
+    log_info "Using preset: $preset" >&2
+
+    local output_file=$(generate_output_name "$input_file" "compressed")
+
+    echo
+    gum style --foreground 108 "Input:  $input_file"
+    gum style --foreground 108 "Output: $output_file"
+    gum style --foreground 108 "Preset: $preset"
+    echo
+
+    if ! ask_yes_no "Proceed with encoding?"; then
+        log_error "Cancelled"
+        exit 0
+    fi
+
+    log_step "Encoding video..."
+    echo
+
+    HandBrakeCLI -i "$input_file" -o "$output_file" -Z "$preset"
+    local exit_code=$?
+
+    echo
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Encoding complete!"
+        log_detail "$output_file"
+    else
+        log_error "Encoding failed"
+        exit 1
+    fi
+}
+
+do_transcode() {
+    local input_file="$1"
+    log_step "Select output format" >&2
+    local format=$(gum choose "mp4" "mkv" "mov" "webm" "avi" --header "Select container format") || exit 1
+    log_success "Format: $format" >&2
+
+    local dir=$(dirname "$input_file")
+    local name=$(basename "$input_file" | sed 's/\.[^.]*$//')
+    local output_file="${dir}/${name}.${format}"
+
+    if [[ -f "$output_file" ]]; then
+        log_error "Output file already exists: $output_file" >&2
+        exit 1
+    fi
+
+    echo
+    gum style --foreground 108 "Input:  $input_file"
+    gum style --foreground 108 "Output: $output_file"
+    gum style --foreground 108 "Mode:   Stream copy (no re-encoding)"
+    echo
+
+    if ! ask_yes_no "Proceed with transcode?"; then
+        log_error "Cancelled"
+        exit 0
+    fi
+
+    log_step "Transcoding video (stream copy)..."
+    echo
+
+    local ffmpeg_cmd=(ffmpeg -i "$input_file" -c copy -y -loglevel error)
+    [[ "$format" == "mp4" || "$format" == "mov" ]] && ffmpeg_cmd+=(-movflags +faststart)
+    ffmpeg_cmd+=("$output_file")
+
+    gum spin --spinner dot --title "Remuxing streams... " -- "${ffmpeg_cmd[@]}"
+    local exit_code=$?
+
+    echo
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Transcode complete!"
+        log_detail "$output_file"
+    else
+        log_error "Transcode failed"
+        exit 1
+    fi
+}
+
+main() {
+    log_header "Video transcode"
+
+    log_step "Select operation"
+    local operation=$(gum choose \
+        "Compress / Downscale / Upscale" \
+        "Transcode" \
+        --header "What would you like to do?") || exit 1
+
+    log_success "Operation: $operation"
+    echo
+
+    local input_file=$(get_input_file)
+    echo
+
+    case "$operation" in
+        "Compress / Downscale / Upscale") do_compress "$input_file" ;;
+        "Transcode") do_transcode "$input_file" ;;
+    esac
+
+    show_done
+}
+
+main "$@"

@@ -1,0 +1,19 @@
+name = "setup"
+name_pretty = "Setup"
+fixed_order = true
+icon = "󰉉"
+
+[[entries]]
+icon = ""
+text = "Postgres"
+actions = { "postgres" = "walker --theme menus -m menus:postgres --width 295 --minheight 1 --maxheight 600" }
+
+[[entries]]
+icon = ""
+text = "Docker"
+actions = { "docker" =  "ghostty --class=local.floating -e docker-setup" }
+
+[[entries]]
+icon = ""
+text = "Node.js"
+actions = { "nodejs" = "ghostty --class=local.floating -e nodejs-setup" }

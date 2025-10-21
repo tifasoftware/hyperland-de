@@ -1,0 +1,46 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+DOTFILES_DIR="$HOME/.local/share/dotfiles"
+BRANCH=$(git --no-pager -C "$DOTFILES_DIR" branch --show-current)
+
+if [[ "$BRANCH" == "dev" ]]; then
+  # Dev branch: check for new commits, then pull if available
+  git --no-pager -C "$DOTFILES_DIR" fetch origin dev -q
+
+  local_commit=$(git --no-pager -C "$DOTFILES_DIR" rev-parse --short HEAD)
+  remote_commit=$(git --no-pager -C "$DOTFILES_DIR" rev-parse --short origin/dev)
+
+  if [[ "$local_commit" != "$remote_commit" ]]; then
+    log_success "Dev update available ($local_commit -> $remote_commit)"
+    git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
+    git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
+    log_success "Dev updated to $remote_commit"
+  else
+    log_info "Dev is up to date ($local_commit)"
+    exit 1
+  fi
+else
+  # Master branch: check for new tags, then pull if available
+  latest_tag=$(git --no-pager -C "$DOTFILES_DIR" ls-remote --tags origin 2>/dev/null | grep -v "{}" | awk '{print $2}' | sed 's#refs/tags/##' | sort -V | tail -n 1)
+  if [[ -z "$latest_tag" ]]; then
+    log_error "Could not retrieve latest tag"
+    exit 1
+  fi
+
+  current_tag=$(git --no-pager -C "$DOTFILES_DIR" describe --tags $(git --no-pager -C "$DOTFILES_DIR" rev-list --tags --max-count=1) 2>/dev/null)
+  if [[ -z "$current_tag" ]]; then
+    log_error "Could not retrieve current tag"
+    exit 1
+  fi
+
+  if [[ "$current_tag" != "$latest_tag" ]]; then
+    log_success "Master update available ($current_tag -> $latest_tag)"
+    git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
+    git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
+    log_success "Master updated to $latest_tag"
+  else
+    log_info "Master is up to date ($current_tag)"
+    exit 1
+  fi
+fi

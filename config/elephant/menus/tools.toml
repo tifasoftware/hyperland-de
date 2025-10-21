@@ -1,0 +1,19 @@
+name = "tools"
+name_pretty = "tools"
+fixed_order = true
+icon = ""
+
+[[entries]]
+icon = ""
+text = "Download video"
+actions = { "download-video" = "ghostty --class=local.floating -e media-download" }
+
+[[entries]]
+icon = ""
+text = "Transcode"
+actions = { "transcode" = "walker --theme menus -m menus:transcode --width 295 --minheight 1 --maxheight 600" }
+
+[[entries]]
+icon = ""
+text = "Backups"
+actions = { "backups" = "walker --theme menus -m menus:backups --width 295 --minheight 1 --maxheight 600" }

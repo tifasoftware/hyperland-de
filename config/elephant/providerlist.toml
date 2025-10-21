@@ -1,0 +1,12 @@
+hidden = [ 
+	"menus:system",
+	"menus:menu",
+	"menus:postgres",
+	"menus:setup",
+	"menus:capture",
+	"menus:screenshots",
+	"menus:backups",
+  "menus:tools",
+  "menus:themes",
+  "menus:transcode"
+ ]

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+themes=$(theme-list)
+
+if [[ -z "$themes" ]]; then
+  notify-send "Error" "No themes found"
+  exit 1
+fi
+
+selected=$(echo "$themes" | walker --dmenu --theme menus --width 295 --minheight 1 --maxheight 600 -p "Select" 2>/dev/null)
+
+if [[ "$selected" == "CNCLD" || -z "$selected" ]]; then
+  exit 0
+fi
+
+selected=$(echo "$selected" | tr -d '\n' | xargs)
+
+theme-set "$selected"
