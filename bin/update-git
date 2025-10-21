@@ -12,12 +12,20 @@ if [[ "$BRANCH" == "dev" ]]; then
   remote_commit=$(git --no-pager -C "$DOTFILES_DIR" rev-parse --short origin/dev)
 
   if [[ "$local_commit" != "$remote_commit" ]]; then
-    log_success "Dev update available ($local_commit -> $remote_commit)"
+    log_success "Update available ($local_commit -> $remote_commit)"
+
+    # Show what's changing
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" log --oneline --color=always "$local_commit..$remote_commit" | sed 's/^/  /'
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" diff --stat --color=always "$local_commit..$remote_commit" | sed 's/^/  /'
+    echo ""
+
     git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
     git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
-    log_success "Dev updated to $remote_commit"
+    log_success "Updated to $remote_commit"
   else
-    log_info "Dev is up to date ($local_commit)"
+    log_info "Dev branch up to date"
     exit 1
   fi
 else
@@ -35,12 +43,20 @@ else
   fi
 
   if [[ "$current_tag" != "$latest_tag" ]]; then
-    log_success "Master update available ($current_tag -> $latest_tag)"
+    log_success "Update available ($current_tag -> $latest_tag)"
+
+    # Show what's changing
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" log --oneline --color=always "$current_tag..$latest_tag" | sed 's/^/  /'
+    echo ""
+    git --no-pager -C "$DOTFILES_DIR" diff --stat --color=always "$current_tag..$latest_tag" | sed 's/^/  /'
+    echo ""
+
     git --no-pager -C "$DOTFILES_DIR" pull --autostash -q
     git --no-pager -C "$DOTFILES_DIR" diff --check || git --no-pager -C "$DOTFILES_DIR" reset --merge
-    log_success "Master updated to $latest_tag"
+    log_success "Updated to $latest_tag"
   else
-    log_info "Master is up to date ($current_tag)"
+    log_info "Up to date ($current_tag)"
     exit 1
   fi
 fi

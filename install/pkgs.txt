@@ -2,9 +2,8 @@
 gnome-keyring
 polkit-gnome
 
-# Browsers
-chromium
-zen-browser-bin
+# Browser
+helium-browser-bin
 
 # Development
 git

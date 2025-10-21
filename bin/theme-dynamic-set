@@ -185,7 +185,6 @@ main() {
     process_template "$TEMPLATES_DIR/swayosd.css" "$OUTPUT_DIR/swayosd.css"
     process_template "$TEMPLATES_DIR/walker.css" "$OUTPUT_DIR/walker.css"
     process_template "$TEMPLATES_DIR/hyprlock.conf" "$OUTPUT_DIR/hyprlock.conf"
-    process_template "$TEMPLATES_DIR/chromium.theme" "$OUTPUT_DIR/chromium.theme"
     process_template "$TEMPLATES_DIR/gtk.css" "$OUTPUT_DIR/gtk.css"
 
     echo
@@ -241,7 +240,6 @@ main() {
     killall -SIGUSR2 ghostty
     theme-set-vscode
     theme-set-gnome
-    theme-set-chromium
 
     echo "✓ Applications reloaded"
     echo
