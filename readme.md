@@ -2,7 +2,7 @@
 
 [![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
 
-Dotfiles setup based on [Omarchy](https://omarchy.org/), with static and dynamic themes and plenty of useful scripts.
+Dotfiles setup with static and dynamic themes and plenty of useful scripts.
 
 [Credits - read here please](#credits)
 
