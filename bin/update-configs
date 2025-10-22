@@ -1,0 +1,75 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+source "$HOME/.local/share/dotfiles/install/lib/backup.sh"
+
+DOTFILES_DIR="$HOME/.local/share/dotfiles"
+
+log_step "Checking for config changes..."
+
+# Get current commit
+cd "$DOTFILES_DIR"
+CURRENT_COMMIT=$(git rev-parse HEAD)
+
+PREV_COMMIT=$(git rev-parse ORIG_HEAD 2>/dev/null || echo "$CURRENT_COMMIT")
+
+if [ "$CURRENT_COMMIT" = "$PREV_COMMIT" ]; then
+  log_info "No config changes to apply"
+  exit 0
+fi
+
+# Get list of changed files in static directories
+CHANGED_FILES=$(git diff --name-only "$PREV_COMMIT..$CURRENT_COMMIT" -- config/ applications/)
+
+if [ -z "$CHANGED_FILES" ]; then
+  log_info "No config changes to apply"
+  exit 0
+fi
+
+log_info "Files changed:"
+echo "$CHANGED_FILES" | while read -r file; do
+  log_detail "$file"
+done
+echo
+
+# Initialize backup session
+BACKUP_SESSION=$(init_backup_session)
+log_info "Creating backup: $BACKUP_SESSION"
+
+# Backup and update changed files
+echo "$CHANGED_FILES" | while read -r file; do
+  source_file="$DOTFILES_DIR/$file"
+
+  if [[ "$file" =~ ^config/ ]]; then
+    target="$HOME/.${file}" 
+  elif [[ "$file" =~ ^applications/ ]]; then
+    target="$HOME/.local/share/${file}"  
+  else
+    continue
+  fi
+
+  if [ ! -e "$source_file" ]; then
+    continue
+  fi
+
+  if [ -e "$target" ]; then
+    backup_file "$target" 2>/dev/null || true
+  fi
+
+  rm -rf "$target"
+  mkdir -p "$(dirname "$target")"
+
+  if [ -d "$source_file" ]; then
+    cp -r "$source_file" "$target"
+  else
+    cp "$source_file" "$target"
+  fi
+
+  log_success "Updated: $file"
+done
+
+source "$HOME/.local/share/dotfiles/.dotfiles-backup-session"
+log_info "Backup saved to: $BACKUP_DIR"
+
+rm -f "$HOME/.local/share/dotfiles/.dotfiles-backup-session"
+
+hyprctl reload 2>/dev/null && log_success "Hyprland reloaded" || true

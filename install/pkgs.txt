@@ -4,6 +4,7 @@ polkit-gnome
 
 # Browser
 helium-browser-bin
+zen-browser-bin
 
 # Development
 git
@@ -27,6 +28,9 @@ pv
 bc
 
 # Hyprland Ecosystem
+hyprland
+hyprland-qtutils
+hyprland-qt-support
 hyprpaper
 hyprpicker
 hypridle
