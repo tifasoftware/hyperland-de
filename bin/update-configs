@@ -3,73 +3,230 @@ source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
 source "$HOME/.local/share/dotfiles/install/lib/backup.sh"
 
 DOTFILES_DIR="$HOME/.local/share/dotfiles"
+REPO_CONFIG="$DOTFILES_DIR/config"
+USER_CONFIG="$HOME/.config"
+REPO_APPLICATIONS="$DOTFILES_DIR/applications"
+USER_APPLICATIONS="$HOME/.local/share/applications"
+
+DRY_RUN=false
+if [[ "$1" == "--dry-run" ]]; then
+  DRY_RUN=true
+fi
+
+EXCLUDES=(
+  "waypaper"
+  "waypaper/*"
+  "hypr/hyprland.conf"
+  "hypr/conf/monitors.conf"
+)
+
+is_excluded() {
+  local rel_path="$1"
+  for pattern in "${EXCLUDES[@]}"; do
+    # Check exact match
+    if [[ "$rel_path" == "$pattern" ]]; then
+      return 0
+    fi
+    # Check if path starts with pattern (for directory exclusions)
+    if [[ "$pattern" == *"/*" ]]; then
+      local dir_pattern="${pattern%/*}"
+      if [[ "$rel_path" == "$dir_pattern"/* ]] || [[ "$rel_path" == "$dir_pattern" ]]; then
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+# Function to get checksum of file
+get_checksum() {
+  if [ -f "$1" ]; then
+    sha256sum "$1" | awk '{print $1}'
+  fi
+}
+
+# Counters
+NEW_COUNT=0
+CHANGED_COUNT=0
+SKIP_COUNT=0
+EXCLUDED_COUNT=0
+APP_COUNT=0
+
+# Arrays to store items for processing
+declare -a NEW_ITEMS
+declare -a CHANGED_ITEMS
+declare -a NEW_APPS
+
+# Function to compare directories recursively
+compare_items() {
+  local repo_path="$1"
+  local rel_path="${repo_path#$REPO_CONFIG/}"
+  local user_path="$USER_CONFIG/$rel_path"
+
+  if is_excluded "$rel_path"; then
+    if [ "$DRY_RUN" = true ]; then
+      log_detail "[EXCLUDED] $rel_path"
+    fi
+    ((EXCLUDED_COUNT++))
+    return
+  fi
+
+  if [ -d "$repo_path" ]; then
+    # It's a directory
+    if [ ! -e "$user_path" ]; then
+      NEW_ITEMS+=("$repo_path|$user_path|DIR")
+      ((NEW_COUNT++))
+    fi
+    for item in "$repo_path"/*; do
+      [ -e "$item" ] || continue
+      compare_items "$item"
+    done
+  else
+    # It's a file
+    if [ ! -e "$user_path" ]; then
+      NEW_ITEMS+=("$repo_path|$user_path|FILE")
+      ((NEW_COUNT++))
+    elif [ ! -f "$user_path" ]; then
+      CHANGED_ITEMS+=("$repo_path|$user_path|MISMATCH")
+      ((CHANGED_COUNT++))
+    else
+      # Both are files, compare checksums
+      repo_sum=$(get_checksum "$repo_path")
+      user_sum=$(get_checksum "$user_path")
+
+      if [ "$repo_sum" != "$user_sum" ]; then
+        CHANGED_ITEMS+=("$repo_path|$user_path|FILE")
+        ((CHANGED_COUNT++))
+      else
+        ((SKIP_COUNT++))
+      fi
+    fi
+  fi
+}
 
 log_step "Checking for config changes..."
 
-# Get current commit
-cd "$DOTFILES_DIR"
-CURRENT_COMMIT=$(git rev-parse HEAD)
-
-PREV_COMMIT=$(git rev-parse ORIG_HEAD 2>/dev/null || echo "$CURRENT_COMMIT")
-
-if [ "$CURRENT_COMMIT" = "$PREV_COMMIT" ]; then
-  log_info "No config changes to apply"
-  exit 0
-fi
-
-# Get list of changed files in static directories
-CHANGED_FILES=$(git diff --name-only "$PREV_COMMIT..$CURRENT_COMMIT" -- config/ applications/)
-
-if [ -z "$CHANGED_FILES" ]; then
-  log_info "No config changes to apply"
-  exit 0
-fi
-
-log_info "Files changed:"
-echo "$CHANGED_FILES" | while read -r file; do
-  log_detail "$file"
+for item in "$REPO_CONFIG"/*; do
+  [ -e "$item" ] || continue
+  compare_items "$item"
 done
+
+if [ -d "$REPO_APPLICATIONS" ]; then
+  for item in "$REPO_APPLICATIONS"/*; do
+    [ -e "$item" ] || continue
+    [ -f "$item" ] || continue
+
+    filename=$(basename "$item")
+    user_app="$USER_APPLICATIONS/$filename"
+
+    if [ ! -e "$user_app" ]; then
+      NEW_APPS+=("$item|$user_app")
+      ((APP_COUNT++))
+    fi
+  done
+fi
+
+TOTAL_UPDATES=$((NEW_COUNT + CHANGED_COUNT + APP_COUNT))
+
+if [ $TOTAL_UPDATES -eq 0 ]; then
+  log_info "No config changes to apply"
+  exit 0
+fi
+
+# Display summary
 echo
+log_info "Found $TOTAL_UPDATES item(s) to update:"
+log_detail "New: $NEW_COUNT, Changed: $CHANGED_COUNT, Unchanged: $SKIP_COUNT"
+echo
+
+if [ "$DRY_RUN" = true ]; then
+  log_step "Dry run - showing what would be updated:"
+  echo
+
+  if [ ${#NEW_ITEMS[@]} -gt 0 ]; then
+    log_info "New items (${#NEW_ITEMS[@]}):"
+    for item in "${NEW_ITEMS[@]}"; do
+      IFS='|' read -r repo_path user_path type <<<"$item"
+      rel_path="${repo_path#$REPO_CONFIG/}"
+      log_detail "$rel_path"
+    done
+    echo
+  fi
+
+  if [ ${#CHANGED_ITEMS[@]} -gt 0 ]; then
+    log_info "Changed items (${#CHANGED_ITEMS[@]}):"
+    for item in "${CHANGED_ITEMS[@]}"; do
+      IFS='|' read -r repo_path user_path type <<<"$item"
+      rel_path="${repo_path#$REPO_CONFIG/}"
+      log_detail "$rel_path"
+    done
+    echo
+  fi
+
+  if [ ${#NEW_APPS[@]} -gt 0 ]; then
+    log_info "New applications (${#NEW_APPS[@]}):"
+    for item in "${NEW_APPS[@]}"; do
+      IFS='|' read -r repo_path user_path <<<"$item"
+      filename=$(basename "$repo_path")
+      log_detail "$filename"
+    done
+    echo
+  fi
+
+  log_success "Dry run complete - no files were modified"
+  exit 0
+fi
 
 # Initialize backup session
 BACKUP_SESSION=$(init_backup_session)
 log_info "Creating backup: $BACKUP_SESSION"
+echo
 
-# Backup and update changed files
-echo "$CHANGED_FILES" | while read -r file; do
-  source_file="$DOTFILES_DIR/$file"
+for item in "${NEW_ITEMS[@]}"; do
+  IFS='|' read -r repo_path user_path type <<<"$item"
+  rel_path="${repo_path#$REPO_CONFIG/}"
 
-  if [[ "$file" =~ ^config/ ]]; then
-    target="$HOME/.${file}" 
-  elif [[ "$file" =~ ^applications/ ]]; then
-    target="$HOME/.local/share/${file}"  
+  mkdir -p "$(dirname "$user_path")"
+
+  if [ "$type" = "DIR" ]; then
+    if [ ! -d "$user_path" ]; then
+      mkdir -p "$user_path"
+      log_success "Created: $rel_path/"
+    fi
   else
-    continue
+    cp "$repo_path" "$user_path"
+    log_success "Added: $rel_path"
   fi
-
-  if [ ! -e "$source_file" ]; then
-    continue
-  fi
-
-  if [ -e "$target" ]; then
-    backup_file "$target" 2>/dev/null || true
-  fi
-
-  rm -rf "$target"
-  mkdir -p "$(dirname "$target")"
-
-  if [ -d "$source_file" ]; then
-    cp -r "$source_file" "$target"
-  else
-    cp "$source_file" "$target"
-  fi
-
-  log_success "Updated: $file"
 done
 
-source "$HOME/.local/share/dotfiles/.dotfiles-backup-session"
-log_info "Backup saved to: $BACKUP_DIR"
+for item in "${CHANGED_ITEMS[@]}"; do
+  IFS='|' read -r repo_path user_path type <<<"$item"
+  rel_path="${repo_path#$REPO_CONFIG/}"
 
-rm -f "$HOME/.local/share/dotfiles/.dotfiles-backup-session"
+  if [ -e "$user_path" ]; then
+    backup_file "$user_path" 2>/dev/null || true
+  fi
 
-hyprctl reload 2>/dev/null && log_success "Hyprland reloaded" || true
+  rm -rf "$user_path"
+  mkdir -p "$(dirname "$user_path")"
+  cp "$repo_path" "$user_path"
+
+  log_success "Updated: $rel_path"
+done
+
+for item in "${NEW_APPS[@]}"; do
+  IFS='|' read -r repo_path user_path <<<"$item"
+  filename=$(basename "$repo_path")
+
+  mkdir -p "$USER_APPLICATIONS"
+  cp "$repo_path" "$user_path"
+
+  log_success "Added application: $filename"
+done
+
+echo
+if [ -f "$SESSION_FILE" ]; then
+  source "$SESSION_FILE"
+  log_info "Backup saved to: $BACKUP_DIR"
+  rm -f "$SESSION_FILE"
+fi
