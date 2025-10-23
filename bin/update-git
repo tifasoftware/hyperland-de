@@ -56,6 +56,8 @@ else
   if [[ "$current_tag" != "$latest_tag" ]]; then
     log_success "Update available ($current_tag -> $latest_tag)"
 
+    git --no-pager -C "$DOTFILES_DIR" fetch --tags -q
+
     echo ""
     git --no-pager -C "$DOTFILES_DIR" log --oneline --color=always "$current_tag..$latest_tag" | sed 's/^/  /'
     echo ""
@@ -67,7 +69,7 @@ else
     log_success "Updated to $latest_tag"
 
     echo
-  
+
     if command -v update-packages &>/dev/null; then
       update-packages
     fi
