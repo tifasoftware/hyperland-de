@@ -23,8 +23,8 @@ ln -snf "$DOTFILES_DIR/current/theme/mako.ini" "$HOME/.config/mako/config"
 mkdir -p "$HOME/.config/fastfetch"
 ln -snf "$DOTFILES_DIR/config/fastfetch/configs/config-default.jsonc" "$HOME/.config/fastfetch/config.jsonc"
 
-mkdir -p "$DOTFILES_DIR/themes/matugen"
-mkdir -p "$DOTFILES_DIR/themes/pywal"
+cp -r "$DOTFILES_DIR/default/matugen" "$DOTFILES_DIR/themes/"
+cp -r "$DOTFILES_DIR/default/pywal" "$DOTFILES_DIR/themes/"
 ln -snf "$DOTFILES_DIR/themes/backgrounds" "$DOTFILES_DIR/themes/matugen"
 ln -snf "$DOTFILES_DIR/themes/backgrounds" "$DOTFILES_DIR/themes/pywal"
 

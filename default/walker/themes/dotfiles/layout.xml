@@ -12,7 +12,7 @@
         <style>
           <class name="box-wrapper"></class>
         </style>
-        <property name="width-request">644</property>
+        <property name="width-request">480</property>
         <property name="overflow">hidden</property>
         <property name="orientation">horizontal</property>
         <property name="valign">center</property>
@@ -88,7 +88,8 @@
                     <property name="overlay-scrolling">true</property>
                     <property name="vexpand">true</property>
                     <property name="max-content-width">600</property>
-                    <property name="max-content-height">400</property>
+                    <property name="min-content-width">400</property>
+                    <property name="max-content-height">500</property>
                     <property name="propagate-natural-height">true</property>
                     <property name="propagate-natural-width">true</property>
                     <property name="hscrollbar-policy">automatic</property>

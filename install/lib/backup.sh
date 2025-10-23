@@ -29,6 +29,9 @@ EOF
     chmod +x "$BACKUP_DIR/rollback.sh"
   fi
 
+  # Create visible reminder to view hidden files
+  touch "$BACKUP_DIR/ENABLE-HIDDEN-FILES-VIEW.txt"
+
   echo "$BACKUP_SESSION"
 }
 

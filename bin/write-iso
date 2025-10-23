@@ -1,0 +1,56 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+set -e
+
+clear
+log_header "ISO to USB Writer"
+
+devices=$(lsblk -d -n -o NAME,SIZE,TRAN,MODEL | grep 'usb' | awk '{printf "/dev/%s (%s - %s)\n", $1, $2, substr($0, index($0,$4))}')
+
+if [[ -z "$devices" ]]; then
+  log_error "No USB devices found"
+  exit 1
+fi
+
+device_info=$(echo "$devices" | gum choose --header "Select USB device")
+if [[ -z "$device_info" ]]; then
+  exit 0
+fi
+
+device=$(echo "$device_info" | awk '{print $1}')
+
+echo
+log_step "Select ISO file"
+iso_path=$(find $HOME -type f -name "*.iso" 2>/dev/null | fzf --prompt="ISO file > " --color 'pointer:green')
+
+if [[ -z "$iso_path" ]]; then
+  exit 0
+fi
+
+echo
+gum style --foreground 9 --bold "⚠ WARNING: $device will be erased"
+if ! ask_yes_no "Continue?"; then
+  exit 0
+fi
+
+sudo -v
+
+lsblk -ln -o NAME,MOUNTPOINT "$device" | awk '$2 != "" {print "/dev/"$1}' | xargs -r -n1 sudo umount 2>/dev/null || true
+
+if ! command -v pv &>/dev/null; then
+  echo
+  log_step "Writing ISO..."
+  sudo dd bs=4M status=progress oflag=sync if="$iso_path" of="$device"
+else
+  echo
+  log_step "Writing ISO..."
+  pv "$iso_path" | sudo dd bs=4M oflag=sync of="$device" status=none
+fi
+
+echo
+spinner "Syncing..." sudo sync
+sudo eject "$device" 2>/dev/null || true
+
+echo
+log_success "Done"
+show_done

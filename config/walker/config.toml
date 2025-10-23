@@ -155,6 +155,7 @@ clipboard = [
 "menus:tools" = [
   { action = "download-video", bind = "Return" },
   { action = "transcode", bind = "Return" },
+  { action = "write-iso", bind = "Return" },
   { action = "backups", bind = "Return" },
   { action = "webapp-install", bind = "Return" },
   { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },

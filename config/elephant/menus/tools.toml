@@ -14,6 +14,11 @@ text = "Transcode"
 actions = { "transcode" = "walker --theme menus -m menus:transcode --width 295 --minheight 1 --maxheight 600" }
 
 [[entries]]
+icon = ""
+text = "ISO to usb"
+actions = { "write-iso" = "ghostty --class=local.floating -e write-iso" }
+
+[[entries]]
 icon = ""
 text = "Backups"
 actions = { "backups" = "walker --theme menus -m menus:backups --width 295 --minheight 1 --maxheight 600" }
