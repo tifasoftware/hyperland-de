@@ -134,7 +134,7 @@ do_transcode() {
     echo
     gum style --foreground 108 "Input:  $input_file"
     gum style --foreground 108 "Output: $output_file"
-    gum style --foreground 108 "Mode:   Stream copy (no re-encoding)"
+    gum style --foreground 108 "Mode:   Re-encode (high quality, preserves resolution/fps)"
     echo
 
     if ! ask_yes_no "Proceed with transcode?"; then
@@ -142,14 +142,14 @@ do_transcode() {
         exit 0
     fi
 
-    log_step "Transcoding video (stream copy)..."
+    log_step "Transcoding video..."
     echo
 
-    local ffmpeg_cmd=(ffmpeg -i "$input_file" -c copy -y -loglevel error)
+    local ffmpeg_cmd=(ffmpeg -i "$input_file" -c:v libx264 -preset fast -crf 18 -c:a aac -b:a 192k -y)
     [[ "$format" == "mp4" || "$format" == "mov" ]] && ffmpeg_cmd+=(-movflags +faststart)
     ffmpeg_cmd+=("$output_file")
 
-    gum spin --spinner dot --title "Remuxing streams... " -- "${ffmpeg_cmd[@]}"
+    "${ffmpeg_cmd[@]}"
     local exit_code=$?
 
     echo
