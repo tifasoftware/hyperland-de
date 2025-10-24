@@ -13,6 +13,9 @@ else
   exit
 fi
 
+# Cache sudo credentials for entire update process
+sudo -v
+
 log_step "Checking for git updates..."
 if command -v update-git &>/dev/null; then
   update-git

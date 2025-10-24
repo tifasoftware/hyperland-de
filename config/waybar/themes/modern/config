@@ -71,6 +71,7 @@
         "cpu",
         "custom/brightness",
         "custom/hypridle",
+        "battery",
         "custom/exit"
     ]
 }

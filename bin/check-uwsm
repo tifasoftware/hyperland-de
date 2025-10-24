@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Check if Hyprland is running under UWSM
+# Sends a persistent notification if not
+
+if ! uwsm check is-active; then
+    notify-send \
+        --app-name="UWSM Warning" \
+        --urgency=critical \
+        --expire-time=0 \
+        --icon=dialog-warning \
+        "UWSM ERROR" \
+        "Hyprland is not running under UWSM.\nPlease reboot and select 'Hyprland (uwsm managed)' \nat login."
+fi

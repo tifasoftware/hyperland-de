@@ -1,0 +1,309 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+CONFIG_DIR="$HOME/.config/ollama-chat"
+DEFAULT_MODEL_FILE="$CONFIG_DIR/default-model"
+
+ensure_config_dir() {
+  mkdir -p "$CONFIG_DIR"
+}
+
+check_ollama_installed() {
+  if ! command -v ollama &>/dev/null; then
+    log_error "Ollama is not installed"
+    echo
+    log_info "Run: ollama-chat --install"
+    echo
+    show_done
+    exit 1
+  fi
+}
+
+check_ollama_running() {
+  if ! ollama list &>/dev/null; then
+    log_error "Ollama service is not running"
+    echo
+    log_info "Start the service with:"
+    log_detail "sudo systemctl start ollama.service"
+    echo
+    show_done
+    exit 1
+  fi
+}
+
+get_models() {
+  ollama list | tail -n +2 | awk '{print $1}'
+}
+
+handle_install() {
+  log_header "Ollama Installer"
+
+  if command -v ollama &>/dev/null; then
+    log_info "Ollama is already installed"
+    echo
+    show_done
+    exit 0
+  fi
+
+  log_info "Select installation option:"
+  echo
+
+  choice=$(gum choose \
+    "ollama (CPU only)" \
+    "ollama-cuda (NVIDIA GPU)" \
+    "ollama-rocm (AMD GPU)" \
+    "Quit")
+
+  if [[ "$choice" == "Quit" ]]; then
+    exit 0
+  fi
+
+  package=$(echo "$choice" | awk '{print $1}')
+
+  echo
+  log_step "Installing $package... (might take a while)"
+  sudo -v
+
+  if spinner "Installing $package..." paru --noconfirm --needed -S "$package" 2>&1; then
+    log_success "$package installed"
+  else
+    log_error "Failed to install $package"
+    show_done
+    exit 1
+  fi
+
+  echo
+  if ask_yes_no "Enable and start ollama?"; then
+    log_step "Enabling and starting ollama.service..."
+    if sudo systemctl enable --now ollama.service; then
+      log_success "ollama.service started"
+    else
+      log_error "Failed to start ollama.service"
+      show_done
+      exit 1
+    fi
+  fi
+  echo
+  show_done
+}
+
+handle_select() {
+  log_header "Ollama - Select Default Model"
+  check_ollama_installed
+  check_ollama_running
+
+  models=$(get_models)
+
+  if [[ -z "$models" ]]; then
+    log_error "No models found"
+    echo
+    log_info "Pull a model first:"
+    log_detail "ollama-chat --pull"
+    echo
+    show_done
+    exit 1
+  fi
+
+  echo
+  log_info "Select default model:"
+  echo
+
+  selected=$(echo "$models" | gum choose)
+
+  if [[ -z "$selected" ]]; then
+    exit 0
+  fi
+
+  ensure_config_dir
+  echo "$selected" >"$DEFAULT_MODEL_FILE"
+
+  echo
+  log_success "Default model set to: $selected"
+  echo
+  show_done
+}
+
+handle_quick() {
+  check_ollama_installed
+  check_ollama_running
+
+  if [[ ! -f "$DEFAULT_MODEL_FILE" ]]; then
+    log_header "Ollama Quick Chat"
+    log_error "No default model set"
+    echo
+    log_info "Set a default model first:"
+    log_detail "ollama-chat --select"
+    echo
+    show_done
+    exit 1
+  fi
+
+  model=$(cat "$DEFAULT_MODEL_FILE")
+
+  if [[ -z "$model" ]]; then
+    log_header "Ollama - Quick Chat"
+    log_error "Default model file is empty"
+    echo
+    log_info "Set a default model first:"
+    log_detail "ollama-chat --select"
+    echo
+    show_done
+    exit 1
+  fi
+
+  gum style --foreground 8 "Default model: $model"
+  echo
+  ollama run "$model"
+}
+
+handle_chat() {
+  log_header "Ollama - Chat"
+  check_ollama_installed
+  check_ollama_running
+
+  models=$(get_models)
+
+  if [[ -z "$models" ]]; then
+    log_error "No models found"
+    echo
+    log_info "Pull a model first:"
+    log_detail "ollama-chat --pull"
+    echo
+    show_done
+    exit 1
+  fi
+
+  echo
+  log_info "Select model:"
+  echo
+
+  selected=$(echo "$models" | gum choose)
+
+  if [[ -z "$selected" ]]; then
+    exit 0
+  fi
+
+  echo
+  ollama run "$selected"
+}
+
+handle_list() {
+  log_header "Ollama - Models"
+  check_ollama_installed
+  check_ollama_running
+
+  echo
+  ollama list
+  echo
+  show_done
+}
+
+handle_pull() {
+  log_header "Ollama - Pull Model"
+  check_ollama_installed
+  check_ollama_running
+
+  echo
+  log_info "Enter model name to pull"
+  log_detail "Examples: llama3.2, mistral, codellama"
+  log_detail "Browse models: https://ollama.com/library"
+  echo
+
+  model=$(gum input --placeholder "Model name")
+
+  if [[ -z "$model" ]]; then
+    exit 0
+  fi
+
+  echo
+  if ollama pull "$model"; then
+    echo
+    log_success "$model pulled successfully"
+  else
+    echo
+    log_error "Failed to pull $model"
+  fi
+  echo
+  show_done
+}
+
+handle_rm() {
+  log_header "Ollama - Remove Model"
+  check_ollama_installed
+  check_ollama_running
+
+  models=$(get_models)
+
+  if [[ -z "$models" ]]; then
+    log_error "No models found"
+    echo
+    show_done
+    exit 1
+  fi
+
+  echo
+  log_info "Select model to remove:"
+  echo
+
+  selected=$(echo "$models" | gum choose)
+
+  if [[ -z "$selected" ]]; then
+    exit 0
+  fi
+
+  echo
+  if ask_yes_no "Remove $selected?"; then
+    if ollama rm "$selected" &>/dev/null; then
+      log_success "$selected removed"
+    else
+      log_error "Failed to remove $selected"
+    fi
+  fi
+  echo
+  show_done
+}
+
+show_usage() {
+  echo "Usage: ollama-chat [option]"
+  echo
+  echo "Options:"
+  echo "  --install    Install ollama"
+  echo "  --chat       Chat with model selection"
+  echo "  --quick      Quick chat with default model"
+  echo "  --select     Set default model"
+  echo "  --list       List all models"
+  echo "  --pull       Pull a new model"
+  echo "  --rm         Remove a model"
+  echo "  --help       Show this help message"
+}
+
+case "$1" in
+--install)
+  handle_install
+  ;;
+--select)
+  handle_select
+  ;;
+--quick)
+  handle_quick
+  ;;
+--chat)
+  handle_chat
+  ;;
+--list)
+  handle_list
+  ;;
+--pull)
+  handle_pull
+  ;;
+--rm)
+  handle_rm
+  ;;
+--help)
+  show_usage
+  ;;
+*)
+  show_usage
+  exit 1
+  ;;
+esac

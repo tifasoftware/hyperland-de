@@ -1,0 +1,27 @@
+name = "ollama"
+name_pretty = "Ollama"
+fixed_order = true
+
+[[entries]]
+text = "Chat"
+actions = { "chat" = "ghostty --class=local.floating -e ollama-chat --chat" }
+
+[[entries]]
+text = "Select default model"
+actions = { "select-default" = "ghostty --class=local.floating -e ollama-chat --select" }
+
+[[entries]]
+text = "List models"
+actions = { "list-models" = "ghostty --class=local.floating -e ollama-chat --list" }
+
+[[entries]]
+text = "Pull model"
+actions = { "pull-model" = "ghostty --class=local.floating -e ollama-chat --pull" }
+
+[[entries]]
+text = "Remove model"
+actions = { "remove-model" = "ghostty --class=local.floating -e ollama-chat --rm" }
+
+[[entries]]
+text = "Install Ollama"
+actions = { "install" = "ghostty --class=local.floating -e ollama-chat --install" }

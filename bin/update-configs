@@ -18,6 +18,8 @@ EXCLUDES=(
   "waypaper/*"
   "hypr/hyprland.conf"
   "hypr/conf/monitors.conf"
+  "waybar/config"
+  "waybar/style.css"
 )
 
 is_excluded() {
