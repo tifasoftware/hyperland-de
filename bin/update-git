@@ -26,6 +26,10 @@ if [[ "$BRANCH" == "dev" ]]; then
 
     echo
 
+    if command -v run-updates &>/dev/null; then
+      run-updates
+    fi
+
     if command -v update-packages &>/dev/null; then
       update-packages
     fi
@@ -69,6 +73,10 @@ else
     log_success "Updated to $latest_tag"
 
     echo
+
+    if command -v run-updates &>/dev/null; then
+      run-updates
+    fi
 
     if command -v update-packages &>/dev/null; then
       update-packages
