@@ -36,7 +36,7 @@ get_models() {
 }
 
 handle_install() {
-  log_header "Ollama Install"
+  log_header "Ollama Installer"
 
   if command -v ollama &>/dev/null; then
     log_info "Ollama is already installed"
@@ -61,7 +61,7 @@ handle_install() {
   package=$(echo "$choice" | awk '{print $1}')
 
   echo
-  log_step "Installing $package..."
+  log_step "Installing $package... (might take a while)"
   sudo -v
 
   if spinner "Installing $package..." paru --noconfirm --needed -S "$package" 2>&1; then
@@ -141,7 +141,7 @@ handle_quick() {
   model=$(cat "$DEFAULT_MODEL_FILE")
 
   if [[ -z "$model" ]]; then
-    log_header "Ollama Quick Chat"
+    log_header "Ollama - Quick Chat"
     log_error "Default model file is empty"
     echo
     log_info "Set a default model first:"
@@ -151,11 +151,13 @@ handle_quick() {
     exit 1
   fi
 
+  gum style --foreground 8 "Default model: $model"
+  echo
   ollama run "$model"
 }
 
 handle_chat() {
-  log_header "Ollama Chat"
+  log_header "Ollama - Chat"
   check_ollama_installed
   check_ollama_running
 
@@ -186,7 +188,7 @@ handle_chat() {
 }
 
 handle_list() {
-  log_header "Ollama Chat - Models"
+  log_header "Ollama - Models"
   check_ollama_installed
   check_ollama_running
 
@@ -197,7 +199,7 @@ handle_list() {
 }
 
 handle_pull() {
-  log_header "Ollama Pull Model"
+  log_header "Ollama - Pull Model"
   check_ollama_installed
   check_ollama_running
 
@@ -214,9 +216,11 @@ handle_pull() {
   fi
 
   echo
-  if spinner "Pulling $model..." ollama pull "$model" 2>&1; then
+  if ollama pull "$model"; then
+    echo
     log_success "$model pulled successfully"
   else
+    echo
     log_error "Failed to pull $model"
   fi
   echo
@@ -224,7 +228,7 @@ handle_pull() {
 }
 
 handle_rm() {
-  log_header "Ollama Remove Model"
+  log_header "Ollama - Remove Model"
   check_ollama_installed
   check_ollama_running
 
