@@ -77,9 +77,6 @@ compare_items() {
     if [ ! -e "$user_path" ]; then
       NEW_ITEMS+=("$repo_path|$user_path|DIR")
       ((NEW_COUNT++))
-    elif [ -f "$user_path" ] || [ -L "$user_path" ]; then
-      CHANGED_ITEMS+=("$repo_path|$user_path|COLLISION_DIR")
-      ((CHANGED_COUNT++))
     fi
     for item in "$repo_path"/*; do
       [ -e "$item" ] || continue
@@ -89,9 +86,6 @@ compare_items() {
     if [ ! -e "$user_path" ]; then
       NEW_ITEMS+=("$repo_path|$user_path|FILE")
       ((NEW_COUNT++))
-    elif [ -d "$user_path" ]; then
-      CHANGED_ITEMS+=("$repo_path|$user_path|COLLISION_FILE")
-      ((CHANGED_COUNT++))
     elif [ ! -f "$user_path" ]; then
       CHANGED_ITEMS+=("$repo_path|$user_path|MISMATCH")
       ((CHANGED_COUNT++))
@@ -214,17 +208,10 @@ for item in "${CHANGED_ITEMS[@]}"; do
 
   rm -rf "$user_path"
   mkdir -p "$(dirname "$user_path")"
+  cp "$repo_path" "$user_path"
 
-  if [ "$type" = "COLLISION_DIR" ]; then
-    mkdir -p "$user_path"
-    log_success "Replaced with directory: $rel_path/"
-  elif [ "$type" = "COLLISION_FILE" ]; then
-    cp "$repo_path" "$user_path"
-    log_success "Replaced with file: $rel_path"
-  else
-    cp "$repo_path" "$user_path"
-    log_success "Updated: $rel_path"
-  fi
+  log_success "Updated: $rel_path"
+
 done
 
 for item in "${NEW_APPS[@]}"; do
