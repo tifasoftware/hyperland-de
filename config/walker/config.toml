@@ -150,6 +150,7 @@ clipboard = [
   { action = "change-theme", bind = "Return" },
   { action = "change-waybar", bind = "Return" },
   { action = "change-fastfetch", bind = "Return" },
+  { action = "change-starship", bind = "Return" },
   { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
 ]
 

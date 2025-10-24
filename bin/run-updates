@@ -1,0 +1,31 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+DOTFILES_DIR="$HOME/.local/share/dotfiles"
+UPDATES_DIR="$DOTFILES_DIR/updates"
+APPLIED_FILE="$DOTFILES_DIR/.updates-applied"
+
+touch "$APPLIED_FILE"
+
+if [ ! -d "$UPDATES_DIR" ]; then
+  exit 0
+fi
+
+for update in $(find "$UPDATES_DIR" -maxdepth 1 -name "*.sh" -type f | sort); do
+  update_name=$(basename "$update")
+
+  if grep -qx "$update_name" "$APPLIED_FILE"; then
+    continue
+  fi
+
+  log_step "Running updates..."
+
+  if bash "$update"; then
+    echo "$update_name" >>"$APPLIED_FILE"
+    log_success "Update applied: $update_name"
+    echo
+  else
+    log_error "Update failed: $update_name"
+    exit 1
+  fi
+done
