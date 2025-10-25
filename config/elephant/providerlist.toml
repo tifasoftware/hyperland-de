@@ -8,5 +8,6 @@ hidden = [
 	"menus:backups",
   "menus:tools",
   "menus:themes",
-  "menus:transcode"
+  "menus:transcode",
+  "menus:ollama"
  ]

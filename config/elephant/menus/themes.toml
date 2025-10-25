@@ -17,3 +17,8 @@ actions = { "change-waybar" = "theme-waybar" }
 icon = "󰸌"
 text = "Fastfetch theme"
 actions = { "change-fastfetch" = "theme-fastfetch" }
+
+[[entries]]
+icon = "󰸌"
+text = "Starship theme"
+actions = { "change-starship" = "theme-starship" }

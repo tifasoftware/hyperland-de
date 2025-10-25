@@ -18,6 +18,8 @@ EXCLUDES=(
   "waypaper/*"
   "hypr/hyprland.conf"
   "hypr/conf/monitors.conf"
+  "waybar/config"
+  "waybar/style.css"
 )
 
 is_excluded() {
@@ -72,7 +74,6 @@ compare_items() {
   fi
 
   if [ -d "$repo_path" ]; then
-    # It's a directory
     if [ ! -e "$user_path" ]; then
       NEW_ITEMS+=("$repo_path|$user_path|DIR")
       ((NEW_COUNT++))
@@ -82,7 +83,6 @@ compare_items() {
       compare_items "$item"
     done
   else
-    # It's a file
     if [ ! -e "$user_path" ]; then
       NEW_ITEMS+=("$repo_path|$user_path|FILE")
       ((NEW_COUNT++))
@@ -90,7 +90,6 @@ compare_items() {
       CHANGED_ITEMS+=("$repo_path|$user_path|MISMATCH")
       ((CHANGED_COUNT++))
     else
-      # Both are files, compare checksums
       repo_sum=$(get_checksum "$repo_path")
       user_sum=$(get_checksum "$user_path")
 
@@ -212,6 +211,7 @@ for item in "${CHANGED_ITEMS[@]}"; do
   cp "$repo_path" "$user_path"
 
   log_success "Updated: $rel_path"
+
 done
 
 for item in "${NEW_APPS[@]}"; do

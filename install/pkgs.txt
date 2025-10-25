@@ -81,6 +81,7 @@ unzip
 # System Utilities
 plocate
 pacman-contrib
+power-profiles-daemon
 
 # Fonts, themes & icons
 ttf-cascadia-mono-nerd

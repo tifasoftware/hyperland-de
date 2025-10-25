@@ -26,6 +26,7 @@ anchor_right = true
 "menus:setup" = { input = "Setup", list = "No Results" }
 "menus:themes" = { input = "Themes", list = "No Results" }
 "menus:transcode" = { input = "Transcode media", list = "No Results" }
+"menus:ollama" = { input = "Ollama", list = "No Results" }
 
 [keybinds]
 close = ["Escape"]
@@ -149,6 +150,7 @@ clipboard = [
   { action = "change-theme", bind = "Return" },
   { action = "change-waybar", bind = "Return" },
   { action = "change-fastfetch", bind = "Return" },
+  { action = "change-starship", bind = "Return" },
   { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
 ]
 
@@ -158,12 +160,23 @@ clipboard = [
   { action = "write-iso", bind = "Return" },
   { action = "backups", bind = "Return" },
   { action = "webapp-install", bind = "Return" },
+  { action = "ollama", bind = "Return" },
   { action = "provider:menus:menu", bind = "ctrl x", global = true, after = "ClearReload" },
 ]
 
 "menus:transcode" = [
   { action = "transcode-video", bind = "Return" },
   { action = "transcode-image", bind = "Return" },
+  { action = "provider:menus:tools", bind = "ctrl x", global = true, after = "ClearReload" },
+]
+
+"menus:ollama" = [
+  { action = "chat", bind = "Return" },
+  { action = "select-default", bind = "Return" },
+  { action = "list-models", bind = "Return" },
+  { action = "pull-model", bind = "Return" },
+  { action = "remove-model", bind = "Return" },
+  { action = "install", bind = "Return" },
   { action = "provider:menus:tools", bind = "ctrl x", global = true, after = "ClearReload" },
 ]
 

@@ -4,6 +4,11 @@ fixed_order = true
 icon = ""
 
 [[entries]]
+icon = ""
+text = "Ollama"
+actions = { "ollama" = "walker --theme menus -m menus:ollama --width 295 --minheight 1 --maxheight 600" }
+
+[[entries]]
 icon = ""
 text = "Download video"
 actions = { "download-video" = "ghostty --class=local.floating -e media-download" }
