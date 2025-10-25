@@ -67,7 +67,7 @@ curl -fsSL https://raw.githubusercontent.com/tifasoftware/hyperland-de/master/se
 ```
 
 **⚠️ Important Notes:**
-- This is specifically for **Arch Linux with Hyprland**
+- This is specifically for **CachyOS with Hyprland**
 - I've tested the installer on both fresh installs and configured desktops, but ideally you should **know what you're doing**, make sure to backup manually just in case
 - Everything that will be changed is backed up first
 
