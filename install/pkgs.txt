@@ -10,7 +10,8 @@ zen-browser-bin
 git
 lazygit
 neovim
-visual-studio-code-bin
+emacs
+#visual-studio-code-bin
 
 # Terminal & Shell
 ghostty
