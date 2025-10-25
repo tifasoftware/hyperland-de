@@ -27,12 +27,12 @@ fi
 log_success "gnome-keyring PAM configured"
 
 # Configure pacman.conf
-log_info "Configuring pacman.conf..."
-PACMAN_CONF="/etc/pacman.conf"
+# log_info "Configuring pacman.conf..."
+# PACMAN_CONF="/etc/pacman.conf"
 
-[ -f "$PACMAN_CONF" ] && backup_file "$PACMAN_CONF"
-sudo cp "$DOTFILES_DIR/default/pacman/pacman.conf" "$PACMAN_CONF"
-log_success "pacman.conf configured"
+# [ -f "$PACMAN_CONF" ] && backup_file "$PACMAN_CONF"
+# sudo cp "$DOTFILES_DIR/default/pacman/pacman.conf" "$PACMAN_CONF"
+# log_success "pacman.conf configured"
 
 # Configure UFW
 if is_installed "ufw"; then
