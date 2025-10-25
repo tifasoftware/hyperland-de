@@ -63,7 +63,7 @@ Quick info:
 ### Automatic installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Maciejonos/dotfiles/master/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tifasoftware/hyperland-de/master/setup.sh | bash
 ```
 
 **⚠️ Important Notes:**
