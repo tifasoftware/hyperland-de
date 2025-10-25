@@ -7,24 +7,24 @@ source "$SCRIPT_DIR/lib/backup.sh"
 DOTFILES_DIR="$HOME/.local/share/dotfiles"
 
 if [ -d "$HOME/.config/emacs" ] || [ -L "$HOME/.config/emacs" ]; then
-	log_info "Existing nvim config found, backing up..."
-	if [ -e "$HOME/.config/emacs" ]; then
-		backup_file "$HOME/.config/emacs" || {
-			log_error "Failed to backup emacs config"
-			exit 1
-		}
-	fi
-	remove_path "$HOME/.config/emacs"
+  log_info "Existing nvim config found, backing up..."
+  if [ -e "$HOME/.config/emacs" ]; then
+    backup_file "$HOME/.config/emacs" || {
+      log_error "Failed to backup emacs config"
+      exit 1
+    }
+  fi
+  remove_path "$HOME/.config/emacs"
 fi
 
 if ! git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs; then
-	log_error "Failed to clone Doom Emacs"
-	exit 1
+  log_error "Failed to clone Doom Emacs"
+  exit 1
 fi
 #rm -rf ~/.config/nvim/.git
 log_info "Doom Emacs cloned"
 
-~/.config/emacs/bin/doom install
+~/.config/emacs/bin/doom install --force
 
 # Append custom options to options.lua
 #cat >> "$HOME/.config/nvim/lua/config/options.lua" <<'EOF'
