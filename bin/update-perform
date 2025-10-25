@@ -57,12 +57,12 @@ echo
 pkill -RTMIN+1 waybar
 echo
 
-if [ "$(uname -r | sed 's/-arch/\.arch/')" != "$(pacman -Q linux | awk '{print $2}')" ]; then
-  log_info "Linux kernel has been updated."
-  if ask_yes_no "Reboot now?"; then
-    sudo reboot now
-  fi
+# if [ "$(uname -r | sed 's/-arch/\.arch/')" != "$(pacman -Q linux | awk '{print $2}')" ]; then
+#  log_info "Linux kernel has been updated."
+if ask_yes_no "Reboot now?"; then
+   sudo reboot now
 fi
+# fi
 
 # Finishing
 show_done
