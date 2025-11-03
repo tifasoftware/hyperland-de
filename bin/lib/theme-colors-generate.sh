@@ -1,15 +1,10 @@
 #!/bin/bash
 
-WALLPAPER="$1"
 CACHE_DIR="$HOME/.cache/wal"
 COLORS_JSON="$CACHE_DIR/colors.json"
 CONFIG_BASE="$HOME/.local/share/dotfiles"
 TEMPLATES_DIR="$CONFIG_BASE/config/wal/templates"
 OUTPUT_DIR="$CONFIG_BASE/themes/pywal"
-
-# ============================================================================
-# Color Conversion Functions
-# ============================================================================
 
 strip_hash() {
     echo "${1#\#}"
@@ -105,10 +100,6 @@ hue_to_yaru_theme() {
     fi
 }
 
-# ============================================================================
-# Template Processing
-# ============================================================================
-
 process_template() {
     local template_file="$1"
     local output_file="$2"
@@ -148,27 +139,28 @@ process_template() {
     echo "✓ Generated: $output_file"
 }
 
-# ============================================================================
-# Main Flow
-# ============================================================================
+generate_colors_from_wallpaper() {
+    local wallpaper="$1"
 
-main() {
-    if [[ -z "$WALLPAPER" ]]; then
-        echo "Usage: theme-dynamic-set <wallpaper_path>"
-        exit 1
+    if [[ -z "$wallpaper" ]]; then
+        echo "Error: No wallpaper path provided"
+        return 1
     fi
 
-    if [[ ! -f "$WALLPAPER" ]]; then
-        echo "Error: Wallpaper file not found: $WALLPAPER"
-        exit 1
+    if [[ ! -f "$wallpaper" ]]; then
+        echo "Error: Wallpaper file not found: $wallpaper"
+        return 1
     fi
+
+    echo "Generating colors from wallpaper..."
+    echo
 
     echo "Running pywal..."
-    wal -n -s -t -e -i "$WALLPAPER"
+    wal -n -s -t -e -i "$wallpaper"
 
     if [[ ! -f "$COLORS_JSON" ]]; then
         echo "Error: Failed to generate pywal colors"
-        exit 1
+        return 1
     fi
 
     echo "✓ Pywal colors extracted"
@@ -196,7 +188,7 @@ main() {
     fi
     echo
 
-    echo "Generating icon theme..."
+    echo "Generating icon theme for pywal..."
     local accent_color=$(jq -r '.colors.color1' "$COLORS_JSON")
     local hue=$(hex_to_hsl "$accent_color")
     local yaru_theme=$(hue_to_yaru_theme "$hue")
@@ -206,11 +198,11 @@ main() {
 
     echo "Running matugen..."
     if command -v matugen &> /dev/null; then
-        matugen image "$WALLPAPER" -m "dark"
+        matugen image "$wallpaper" -m "dark"
         echo "✓ Matugen colors generated"
 
-        echo "Generating icon theme from matugen..."
-        local matugen_json=$(matugen image "$WALLPAPER" -m "dark" --dry-run -j hex 2>&1)
+        echo "Generating icon theme for matugen..."
+        local matugen_json=$(matugen image "$wallpaper" -m "dark" --dry-run -j hex 2>&1)
         local accent_color=$(echo "$matugen_json" | jq -r '.colors.dark.primary')
         local hue=$(hex_to_hsl "$accent_color")
         local yaru_theme=$(hue_to_yaru_theme "$hue")
@@ -224,26 +216,6 @@ main() {
     fi
     echo
 
-    echo "Updating background symlink..."
-    ln -nsf "$WALLPAPER" "$CONFIG_BASE/current/background"
-    echo "✓ Updated background symlink"
-    echo
-
-    echo "Reloading applications..."
-    sleep 0.5
-
-    restart-app waybar
-    restart-app swayosd-server
-    hyprctl reload
-    pkill -SIGUSR2 btop
-    makoctl reload
-    killall -SIGUSR2 ghostty
-    theme-set-vscode
-    theme-set-gnome
-
-    echo "✓ Applications reloaded"
-    echo
-    echo "Done! Theme applied successfully."
+    echo "✓ Color generation complete"
+    return 0
 }
-
-main "$@"

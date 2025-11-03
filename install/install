@@ -153,6 +153,14 @@ log_info "Restore instructions: cat $RESTORE_FILE"
 # Clean up session file
 rm -f "$HOME/.local/share/dotfiles/.dotfiles-backup-session"
 
+# Mark all existing updates as applied for fresh install
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+if [ -d "$DOTFILES_DIR/updates" ]; then
+  find "$DOTFILES_DIR/updates" -name "*.sh" -type f | sort | while read update; do
+    echo "$(basename "$update")" >> "$DOTFILES_DIR/.updates-applied"
+  done
+fi
+
 echo
 log_info "Please reboot for all changes to take effect"
 echo

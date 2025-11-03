@@ -45,7 +45,6 @@ waybar
 mako
 walker
 swayosd
-swaybg
 grim
 slurp
 satty
@@ -97,11 +96,15 @@ localsend-bin
 mpv
 
 # Elephant Suite
-elephant-calc
+elephant
+elephant-desktopapplications
+elephant-providerlist
 elephant-clipboard
-elephant-files
 elephant-menus
+elephant-calc
+elephant-files
 elephant-todo
+elephant-symbols
 
 # Image & Video Processing
 imagemagick
