@@ -1,0 +1,120 @@
+# Security & Authentication
+gnome-keyring
+polkit-gnome
+
+# Browser
+zen-browser-bin
+
+# Development
+git
+lazygit
+neovim
+emacs
+
+# Terminal & Shell
+ghostty
+zsh
+starship
+eza
+bat
+btop
+fastfetch
+fd
+fzf
+ripgrep
+zoxide
+pv
+bc
+
+# Hyprland Ecosystem
+hyprland
+hyprland-qtutils
+hyprland-qt-support
+hyprpaper
+hyprpicker
+hypridle
+hyprlock
+xdg-desktop-portal-hyprland
+hyprsunset
+hyprcursor
+hyprshot
+
+# Wayland Tools & UI
+waybar
+mako
+walker
+swayosd
+grim
+slurp
+satty
+kooha
+zenity
+uwsm
+python-pywal16
+gjs
+waypaper
+matugen
+impala
+loupe
+
+# Audio
+pamixer
+wiremix
+
+# Bluetooth & Network
+bluez
+bluez-libs
+bluez-utils
+bluetui
+openssh
+ufw
+
+# File Management
+nautilus
+nautilus-open-any-terminal
+rsync
+gvfs-dnssd
+unzip
+
+# System Utilities
+plocate
+pacman-contrib
+power-profiles-daemon
+
+# Fonts, themes & icons
+ttf-cascadia-mono-nerd
+noto-fonts
+noto-fonts-emoji
+otf-font-awesome
+yaru-icon-theme
+bibata-cursor-theme
+gnome-themes-extra
+
+# Applications
+localsend-bin
+mpv
+
+# Elephant Suite
+elephant
+elephant-desktopapplications
+elephant-providerlist
+elephant-clipboard
+elephant-menus
+elephant-calc
+elephant-files
+elephant-todo
+elephant-symbols
+
+# Image & Video Processing
+imagemagick
+ffmpeg
+handbrake-cli
+yt-dlp
+
+# Desktop Portals
+xdg-desktop-portal-gtk
+xdg-utils
+
+# Utilities
+wget
+jq

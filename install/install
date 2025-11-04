@@ -89,6 +89,7 @@ log_header "Dotfiles Installation"
 START_TIME=$(date +%s)
 TOTAL_STEPS=9
 CURRENT_STEP=0
+SYSTEM_ARCH=$(uname -m)
 
 if ! is_installed "paru"; then
   CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -98,7 +99,15 @@ fi
 
 CURRENT_STEP=$((CURRENT_STEP + 1))
 log_step "[$CURRENT_STEP/$TOTAL_STEPS] Installing packages"
-_installPackages "$SCRIPT_DIR/pkgs.txt"
+
+if [[ "$SYSTEM_ARCH" == "x86_64" ]]; then
+	_installPackages "$SCRIPT_DIR/pkgs.txt"
+elif [[ "$SYSTEM_ARCH" == "aarch64" ]]; then
+	_installPackages "$SCRIPT_DIR/pkgs_arm.txt"
+else
+	log_info "Architecture Not Supported."
+	_installPackages "$SCRIPT_DIR/pkgs_arm.txt"
+fi
 
 CURRENT_STEP=$((CURRENT_STEP + 1))
 log_step "[$CURRENT_STEP/$TOTAL_STEPS] Installing zsh plugins"
