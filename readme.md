@@ -4,8 +4,6 @@
 
 Dotfiles setup with static and dynamic themes and plenty of useful scripts.
 
-[Credits - read here please](#credits)
-
 <table>
   <tr>
     <td><img src="demo/1.png" width="400"/></td>
@@ -22,6 +20,7 @@ Dotfiles setup with static and dynamic themes and plenty of useful scripts.
 </table>
 
 Quick info:
+
 - [bin](bin) - all scripts live here, it is added to path in uwsm config
 - [install](install/install) - main installation script
 - [pkgs.txt](install/pkgs.txt) - packages to be installed
@@ -67,7 +66,12 @@ curl -fsSL https://raw.githubusercontent.com/tifasoftware/hyperland-de/master/se
 ```
 
 **⚠️ Important Notes:**
+<<<<<<< HEAD
 - This is specifically for **CachyOS with Hyprland**
+=======
+
+- This is specifically for **Arch Linux with Hyprland**
+>>>>>>> c87044707b646166e2a388d48db465b832456fea
 - I've tested the installer on both fresh installs and configured desktops, but ideally you should **know what you're doing**, make sure to backup manually just in case
 - Everything that will be changed is backed up first
 
@@ -86,21 +90,25 @@ curl -fsSL https://raw.githubusercontent.com/tifasoftware/hyperland-de/master/se
   - A text file listing all changed files
   - Commands to quickly revert everything
   - A [rollback script](install/lib/rollback.sh) for easy restoration
+
 </details>
 
 <details>
 <summary><b>Package Installation</b></summary>
 
 - Installs [packages](install/pkgs.txt) from official repos and AUR
+
 </details>
 
 <details>
 <summary><b>Hardware Detection</b></summary>
 
 The installer [detects your hardware](install/setup-by-hardware):
+
 - **Laptop/Desktop** - Uses brightnessctl or ddcutil respectively, applies proper Hyprland keybinding profiles
 - **Monitor Configuration** - Checks your monitor's highest resolution and refresh rate with `hyprctl monitors` and creates appropriate `monitors.conf`
 - **Nvidia GPUs** - Detects Nvidia cards and applies [Nvidia-specific setup](install/setup-nvidia) with proper Hyprland env configs
+
 </details>
 
 <details>
@@ -110,18 +118,21 @@ The installer [detects your hardware](install/setup-by-hardware):
 - Sets up static and dynamic themes via [theme setup](install/setup-theme)
 - Configures symlinks for theme management
 - Some files live in the [default](default) directory - these are git synced and will get overwritten with updates
+
 </details>
 
 <details>
 <summary><b>Scripts</b></summary>
 
 A big collection of scripts, mainly used with Walker & Elephant. If installing manually make sure to add the scripts folder to path:
+
 - **Theme Management** - Switch themes, cycle backgrounds, apply dynamic theming
 - **Development** - PostgreSQL setup/backup/restore, Docker setup, Node.js setup
 - **Package Management** - Install/remove packages interactively
 - **Media Tools** - Video downloads (yt-dlp), transcoding (ffmpeg, handbrake-cli)
 - **System Utils** - Backup/restore files, keybinds, screenshots menu and video recording
 - Most scripts are accessible interactively through Walker or Elephant
+
 </details>
 
 <details>
@@ -133,11 +144,13 @@ A big collection of scripts, mainly used with Walker & Elephant. If installing m
   - Pacman configuration
   - UFW firewall
 - Full [ZSH setup](default/zshrc) with modular configuration
+
 </details>
 
 ### Manual installation
 
 You can manually use the dotfiles without the installer:
+
 1. Clone the repository
 2. Copy desired configs from `config/` to `~/.config/` (some configs live in [default](default) directory. Also everything relies on the scripts folder being in path)
 3. Copy scripts from `bin/` to your preferred location
@@ -148,6 +161,7 @@ You can manually use the dotfiles without the installer:
 ## Screenshots & videos
 
 ### Waybar themes
+
 Omarchy waybar
 ![Waybar1](demo/waybar-omarchy.png)
 Eli dotfiles waybar
@@ -156,18 +170,21 @@ Modern waybar config
 ![Waybar3](demo/waybar-modern.png)
 
 ### Lazyvim
+
 ![Lazyvim](demo/lazyvim.png)
 
 ### Menu overview
-https://github.com/user-attachments/assets/9b9cb437-a3e4-4cd7-90f1-80175036e196
+<https://github.com/user-attachments/assets/9b9cb437-a3e4-4cd7-90f1-80175036e196>
 
 ### Dynamic Theming
-https://github.com/user-attachments/assets/044216d5-44a6-4b56-99d0-a820ceef3a68
+<https://github.com/user-attachments/assets/044216d5-44a6-4b56-99d0-a820ceef3a68>
 
 ### Application Launcher - Walker
+
 ![Walker](demo/walker.png)
 
 ### Desktop Overview
+
 <table>
   <tr>
     <td><img src="demo/1.png" width="400"/></td>
@@ -186,10 +203,12 @@ https://github.com/user-attachments/assets/044216d5-44a6-4b56-99d0-a820ceef3a68
 ---
 
 ## Keybinds
+
 Just press SUPER + ALT + Space -> keybindings - all bindings nicely sorted here
 
 Most important ones:
-- SUPER + Q	= Open Terminal
+
+- SUPER + Q = Open Terminal
 - SUPER + W = Close window
 - SUPER + R = Open Walker
 - SUPER + E = File manager
@@ -206,8 +225,9 @@ Walker bindings - `ctrl + x` to go back from submenu
 ### Changing Themes
 
 The setup includes both static and dynamic theming:
- - Open walker and select a theme you like, you can pick between static ones or Matugen/Pywal
- - Also, you can pick 3 different waybar themes and 2 fastfetch presets
+
+- Open walker and select a theme you like, you can pick between static ones or Matugen/Pywal
+- Also, you can pick 3 different waybar themes and 2 fastfetch presets
 
 ### Customizing Configs
 
@@ -218,8 +238,6 @@ The setup includes both static and dynamic theming:
 
 ## Credits
 
-By no means am I claiming I created all of this myself - I've taken the whole static theming system & some scripts from [Omarchy](https://omarchy.org) - of course a lot are my own or heavily changed. I wanted something more of my own, that I can customize more easily without installing a full distro. Omarchy is an awesome project, and if you haven't heard of it, you should definitely check it out!
-
-Other projects that I really like:
-- https://github.com/mylinuxforwork
-- https://github.com/elifouts/Dotfiles
+- <https://github.com/basecamp/omarchy>
+- <https://github.com/mylinuxforwork/dotfiles>
+- <https://github.com/elifouts/Dotfiles>
